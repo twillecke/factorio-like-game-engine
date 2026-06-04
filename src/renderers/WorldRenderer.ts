@@ -65,12 +65,28 @@ export class WorldRenderer {
   screenToGrid(screenX: number, screenY: number, chunkId: string): { gridX: number; gridY: number } | null {
     const r = this.chunkRenderers.get(chunkId);
     if (!r) return null;
-    const relX = screenX - r.container.x;
-    const relY = screenY - r.container.y;
-    const gridX = Math.floor(relX / TILE_SIZE);
-    const gridY = Math.floor(relY / TILE_SIZE);
+    const local = r.container.toLocal({ x: screenX, y: screenY });
+    const gridX = Math.floor(local.x / TILE_SIZE);
+    const gridY = Math.floor(local.y / TILE_SIZE);
     if (gridX < 0 || gridX >= CHUNK_SIZE || gridY < 0 || gridY >= CHUNK_SIZE) return null;
     return { gridX, gridY };
+  }
+
+  private static readonly MIN_ZOOM = 0.25;
+  private static readonly MAX_ZOOM = 4;
+
+  zoomAtPoint(screenX: number, screenY: number, factor: number): void {
+    const oldScale = this.root.scale.x;
+    const newScale = Math.max(WorldRenderer.MIN_ZOOM, Math.min(WorldRenderer.MAX_ZOOM, oldScale * factor));
+    if (newScale === oldScale) return;
+    this.root.x = screenX - (screenX - this.root.x) * (newScale / oldScale);
+    this.root.y = screenY - (screenY - this.root.y) * (newScale / oldScale);
+    this.root.scale.set(newScale);
+  }
+
+  pan(dx: number, dy: number): void {
+    this.root.x += dx;
+    this.root.y += dy;
   }
 
   addPipe(pipe: Pipe, chunkId: string): void {
@@ -167,11 +183,13 @@ export class WorldRenderer {
   }
 
   private layout(): void {
-    const { width, height } = engine.screen;
     for (const r of this.chunkRenderers.values()) {
-      r.container.x = (width - CHUNK_PX) / 2;
-      r.container.y = (height - CHUNK_PX) / 2;
+      r.container.x = 0;
+      r.container.y = 0;
     }
+    const { width, height } = engine.screen;
+    this.root.x = (width - CHUNK_PX) / 2;
+    this.root.y = (height - CHUNK_PX) / 2;
   }
 
   destroy(): void {

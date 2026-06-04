@@ -4,10 +4,14 @@ import type { WorldRenderer } from "../renderers/WorldRenderer";
 export class InputSystem implements System {
   private readonly onPointerDown: (e: PointerEvent) => void;
   private readonly onPointerMove: (e: PointerEvent) => void;
-  private readonly onPointerUp: () => void;
+  private readonly onPointerUp: (e: PointerEvent) => void;
   private readonly onPointerLeave: () => void;
+  private readonly onWheel: (e: WheelEvent) => void;
   private isDown = false;
   private lastCell: { gridX: number; gridY: number } | null = null;
+  private isPanning = false;
+  private panLastX = 0;
+  private panLastY = 0;
 
   constructor(
     private canvas: HTMLCanvasElement,
@@ -18,7 +22,20 @@ export class InputSystem implements System {
     onCellHover?: (gridX: number, gridY: number) => void,
     onHoverLeave?: () => void,
   ) {
+    this.onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      worldRenderer.zoomAtPoint(e.clientX, e.clientY, factor);
+    };
+
     this.onPointerDown = (e: PointerEvent) => {
+      if (e.button === 1) {
+        e.preventDefault();
+        this.isPanning = true;
+        this.panLastX = e.clientX;
+        this.panLastY = e.clientY;
+        return;
+      }
       if (e.button === 2) {
         const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
         if (coord) onCellRemove(coord.gridX, coord.gridY);
@@ -33,6 +50,12 @@ export class InputSystem implements System {
     };
 
     this.onPointerMove = (e: PointerEvent) => {
+      if (this.isPanning) {
+        worldRenderer.pan(e.clientX - this.panLastX, e.clientY - this.panLastY);
+        this.panLastX = e.clientX;
+        this.panLastY = e.clientY;
+        return;
+      }
       const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
       if (coord) onCellHover?.(coord.gridX, coord.gridY);
       else onHoverLeave?.();
@@ -48,7 +71,11 @@ export class InputSystem implements System {
       onCellAdd(coord.gridX, coord.gridY);
     };
 
-    this.onPointerUp = () => {
+    this.onPointerUp = (e: PointerEvent) => {
+      if (e.button === 1) {
+        this.isPanning = false;
+        return;
+      }
       this.isDown = false;
       this.lastCell = null;
     };
@@ -58,6 +85,7 @@ export class InputSystem implements System {
     canvas.addEventListener("pointerdown", this.onPointerDown);
     canvas.addEventListener("pointermove", this.onPointerMove);
     canvas.addEventListener("pointerleave", this.onPointerLeave);
+    canvas.addEventListener("wheel", this.onWheel, { passive: false });
     window.addEventListener("pointerup", this.onPointerUp);
   }
 
@@ -67,6 +95,7 @@ export class InputSystem implements System {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
     this.canvas.removeEventListener("pointermove", this.onPointerMove);
     this.canvas.removeEventListener("pointerleave", this.onPointerLeave);
+    this.canvas.removeEventListener("wheel", this.onWheel);
     window.removeEventListener("pointerup", this.onPointerUp);
   }
 }
