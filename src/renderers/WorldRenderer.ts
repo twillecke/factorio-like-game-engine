@@ -9,6 +9,7 @@ import { UserObject } from "../entities/UserObject";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import { LargeUserObjectRenderer } from "./LargeUserObjectRenderer";
 import { PipeRenderer } from "./PipeRenderer";
+import { PreviewRenderer } from "./PreviewRenderer";
 import { UserObjectRenderer } from "./UserObjectRenderer";
 
 export class WorldRenderer {
@@ -16,6 +17,7 @@ export class WorldRenderer {
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
   private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
   private largeObjectRenderers = new Map<string, { r: LargeUserObjectRenderer; chunkId: string }>();
+  readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
 
@@ -30,6 +32,7 @@ export class WorldRenderer {
     const r = new ChunkRenderer(chunk);
     this.chunkRenderers.set(chunk.id, r);
     this.root.addChild(r.container);
+    this.preview.attach(r.container);
     this.layout();
   }
 
@@ -181,6 +184,7 @@ export class WorldRenderer {
     this.largeObjectRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();
     this.chunkRenderers.clear();
+    this.preview.destroy();
     this.root.destroy();
   }
 }

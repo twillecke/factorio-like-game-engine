@@ -4,14 +4,31 @@ import { world } from "../core/World";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
 import { Tank } from "../entities/Tank";
+import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
 export class PlacementSystem implements System {
   private tool: ToolType = "pipe";
 
-  constructor(private chunkId: string) {}
+  constructor(private chunkId: string, private preview: PreviewRenderer) {}
 
   setTool(tool: ToolType): void {
     this.tool = tool;
+  }
+
+  hoverAt(gridX: number, gridY: number): void {
+    this.preview.update(this.tool, gridX, gridY, this.canPlace(gridX, gridY));
+  }
+
+  clearHover(): void {
+    this.preview.clear();
+  }
+
+  private canPlace(gridX: number, gridY: number): boolean {
+    if (this.tool === "pipe") return !this.isOccupied(gridX, gridY);
+    for (let dx = 0; dx < 2; dx++)
+      for (let dy = 0; dy < 2; dy++)
+        if (this.isOccupied(gridX + dx, gridY + dy)) return false;
+    return true;
   }
 
   private isOccupied(gridX: number, gridY: number): boolean {

@@ -31,7 +31,7 @@ export function GameCanvas({ tool }: GameCanvasProps) {
       const worldRenderer = new WorldRenderer();
       worldRenderer.addChunk(chunk);
 
-      const placementSystem = new PlacementSystem(chunk.id);
+      const placementSystem = new PlacementSystem(chunk.id, worldRenderer.preview);
       placementRef.current = placementSystem;
 
       canvas.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -41,6 +41,8 @@ export function GameCanvas({ tool }: GameCanvasProps) {
         chunk.id,
         (x, y) => placementSystem.placeAt(x, y),
         (x, y) => placementSystem.removeAt(x, y),
+        (x, y) => placementSystem.hoverAt(x, y),
+        () => placementSystem.clearHover(),
       );
       world.addSystem(new ChunkSystem());
       world.addSystem(placementSystem);

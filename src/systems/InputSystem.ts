@@ -5,6 +5,7 @@ export class InputSystem implements System {
   private readonly onPointerDown: (e: PointerEvent) => void;
   private readonly onPointerMove: (e: PointerEvent) => void;
   private readonly onPointerUp: () => void;
+  private readonly onPointerLeave: () => void;
   private isDown = false;
   private lastCell: { gridX: number; gridY: number } | null = null;
 
@@ -14,6 +15,8 @@ export class InputSystem implements System {
     chunkId: string,
     onCellAdd: (gridX: number, gridY: number) => void,
     onCellRemove: (gridX: number, gridY: number) => void,
+    onCellHover?: (gridX: number, gridY: number) => void,
+    onHoverLeave?: () => void,
   ) {
     this.onPointerDown = (e: PointerEvent) => {
       if (e.button === 2) {
@@ -29,8 +32,11 @@ export class InputSystem implements System {
     };
 
     this.onPointerMove = (e: PointerEvent) => {
-      if (!this.isDown) return;
       const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
+      if (coord) onCellHover?.(coord.gridX, coord.gridY);
+      else onHoverLeave?.();
+
+      if (!this.isDown) return;
       if (!coord) return;
       const sameAsLast =
         this.lastCell &&
@@ -46,8 +52,11 @@ export class InputSystem implements System {
       this.lastCell = null;
     };
 
+    this.onPointerLeave = () => onHoverLeave?.();
+
     canvas.addEventListener("pointerdown", this.onPointerDown);
     canvas.addEventListener("pointermove", this.onPointerMove);
+    canvas.addEventListener("pointerleave", this.onPointerLeave);
     window.addEventListener("pointerup", this.onPointerUp);
   }
 
@@ -56,6 +65,7 @@ export class InputSystem implements System {
   destroy(): void {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
     this.canvas.removeEventListener("pointermove", this.onPointerMove);
+    this.canvas.removeEventListener("pointerleave", this.onPointerLeave);
     window.removeEventListener("pointerup", this.onPointerUp);
   }
 }
