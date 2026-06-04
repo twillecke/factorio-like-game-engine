@@ -1,5 +1,6 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { Pump } from "../entities/Pump";
+import { Tank } from "../entities/Tank";
 import { UserObject } from "../entities/UserObject";
 import { TILE_SIZE } from "./ChunkRenderer";
 
@@ -23,7 +24,9 @@ const LABEL_STYLE = new TextStyle({
 });
 
 function typeKey(obj: UserObject): string {
-  return obj.id.split("-")[0];
+  if (obj instanceof Pump) return "pump";
+  if (obj instanceof Tank) return "tank";
+  return "unknown";
 }
 
 export class LargeUserObjectRenderer {
