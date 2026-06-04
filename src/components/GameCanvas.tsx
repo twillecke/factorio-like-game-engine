@@ -7,6 +7,7 @@ import { Start } from "../entities/Start";
 import { WorldRenderer } from "../renderers/WorldRenderer";
 import { ChunkSystem } from "../systems/ChunkSystem";
 import { InputSystem } from "../systems/InputSystem";
+import { PipeSystem } from "../systems/PipeSystem";
 import { PlacementSystem } from "../systems/PlacementSystem";
 
 export function GameCanvas() {
@@ -38,6 +39,7 @@ export function GameCanvas() {
 			);
 			world.addSystem(new ChunkSystem());
 			world.addSystem(placementSystem);
+			world.addSystem(new PipeSystem());
 			world.addSystem(inputSystem);
 
 			engine.ticker.add((ticker) => {

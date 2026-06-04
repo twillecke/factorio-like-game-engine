@@ -1,7 +1,7 @@
 import type { Entity, System } from "../core/types";
 import { world } from "../core/World";
 import { Marker } from "../entities/Marker";
-import { UserObject } from "../entities/UserObject";
+import { Pipe } from "../entities/Pipe";
 
 function isMarker(e: Entity): e is Marker {
   return e instanceof Marker;
@@ -25,7 +25,7 @@ export class PlacementSystem implements System {
       world.unregister(id);
       return;
     }
-    world.register(new UserObject(id, gridX, gridY, this.chunkId));
+    world.register(new Pipe(id, gridX, gridY, this.chunkId));
   }
 
   update(_dt: number): void {}

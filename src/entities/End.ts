@@ -6,6 +6,6 @@ const COL = CHUNK_SIZE - Marker.CELL_SIZE;
 
 export class End extends Marker {
   constructor() {
-    super("end", COL, ROW, 0x3498db);
+    super("end", COL, ROW);
   }
 }

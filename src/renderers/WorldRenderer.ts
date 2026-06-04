@@ -3,15 +3,18 @@ import { engine } from "../core/Engine";
 import { world } from "../core/World";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { type Marker } from "../entities/Marker";
+import { Pipe } from "../entities/Pipe";
 import { UserObject } from "../entities/UserObject";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import { MarkerRenderer } from "./MarkerRenderer";
+import { PipeRenderer } from "./PipeRenderer";
 import { UserObjectRenderer } from "./UserObjectRenderer";
 
 export class WorldRenderer {
   private chunkRenderers = new Map<string, ChunkRenderer>();
   private markerRenderers = new Map<string, { r: MarkerRenderer; chunkId: string }>();
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
+  private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
   private root: Container;
   private readonly onResize: () => void;
 
@@ -83,11 +86,29 @@ export class WorldRenderer {
     return { gridX, gridY };
   }
 
+  addPipe(pipe: Pipe, chunkId: string): void {
+    this.removePipe(pipe.id);
+    const chunk = this.chunkRenderers.get(chunkId);
+    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
+    const r = new PipeRenderer(pipe);
+    chunk.container.addChild(r.container);
+    this.pipeRenderers.set(pipe.id, { r, chunkId });
+  }
+
+  removePipe(id: string): void {
+    const entry = this.pipeRenderers.get(id);
+    if (!entry) return;
+    const chunk = this.chunkRenderers.get(entry.chunkId);
+    chunk?.container.removeChild(entry.r.container);
+    entry.r.destroy();
+    this.pipeRenderers.delete(id);
+  }
+
   render(): void {
     this.syncUserObjects();
-    for (const r of this.chunkRenderers.values()) {
-      r.render();
-    }
+    this.syncPipes();
+    for (const { r } of this.pipeRenderers.values()) r.sync();
+    for (const r of this.chunkRenderers.values()) r.render();
   }
 
   private syncUserObjects(): void {
@@ -102,9 +123,25 @@ export class WorldRenderer {
     }
   }
 
- isUserObject(e: object): e is UserObject {
-  return e instanceof UserObject;
-}
+  private syncPipes(): void {
+    const worldPipes = world.getAll(this.isPipe);
+    const worldIds = new Set(worldPipes.map((p) => p.id));
+
+    for (const id of [...this.pipeRenderers.keys()]) {
+      if (!worldIds.has(id)) this.removePipe(id);
+    }
+    for (const pipe of worldPipes) {
+      if (!this.pipeRenderers.has(pipe.id)) this.addPipe(pipe, pipe.chunkId);
+    }
+  }
+
+  isUserObject(e: object): e is UserObject {
+    return e instanceof UserObject && !(e instanceof Pipe);
+  }
+
+  isPipe(e: object): e is Pipe {
+    return e instanceof Pipe;
+  }
 
   private layout(): void {
     const { width, height } = engine.screen;
@@ -118,6 +155,8 @@ export class WorldRenderer {
     engine.renderer.off("resize", this.onResize);
     for (const { r } of this.userObjectRenderers.values()) r.destroy();
     this.userObjectRenderers.clear();
+    for (const { r } of this.pipeRenderers.values()) r.destroy();
+    this.pipeRenderers.clear();
     for (const { r } of this.markerRenderers.values()) r.destroy();
     this.markerRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();

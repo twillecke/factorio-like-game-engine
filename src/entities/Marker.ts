@@ -7,6 +7,5 @@ export class Marker implements Entity {
     readonly id: string,
     readonly gridX: number,
     readonly gridY: number,
-    readonly color: number,
   ) {}
 }

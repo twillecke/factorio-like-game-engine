@@ -17,9 +17,15 @@ export class MarkerRenderer {
     this.draw();
   }
 
+  private static readonly COLORS: Record<string, number> = {
+    start: 0xe74c3c,
+    end: 0x3498db,
+  };
+
   private draw(): void {
+    const color = MarkerRenderer.COLORS[this.marker.id] ?? 0xffffff;
     const g = this.graphics;
-    g.rect(0, 0, PX, PX).fill({ color: this.marker.color, alpha: 0.85 });
+    g.rect(0, 0, PX, PX).fill({ color, alpha: 0.85 });
     g.rect(0, 0, PX, PX).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
   }
 
