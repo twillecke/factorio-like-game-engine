@@ -24,6 +24,7 @@ export class InputSystem implements System {
         if (coord) onCellRemove(coord.gridX, coord.gridY);
         return;
       }
+      if (e.button !== 0) return;
       this.isDown = true;
       const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
       if (!coord) return;
