@@ -111,6 +111,7 @@ export class WorldRenderer {
     this.syncPipes();
     this.syncLargeObjects();
     for (const { r } of this.pipeRenderers.values()) r.sync();
+    for (const { r } of this.largeObjectRenderers.values()) r.sync();
     for (const r of this.chunkRenderers.values()) r.render();
   }
 

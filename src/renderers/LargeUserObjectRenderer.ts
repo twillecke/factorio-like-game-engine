@@ -32,6 +32,7 @@ function typeKey(obj: UserObject): string {
 export class LargeUserObjectRenderer {
   readonly container: Container;
   private graphics: Graphics;
+  private lastFilled: boolean | null = null;
 
   constructor(private readonly obj: UserObject) {
     this.container = new Container();
@@ -43,9 +44,18 @@ export class LargeUserObjectRenderer {
     this.addLabel();
   }
 
+  sync(): void {
+    if (!(this.obj instanceof Tank)) return;
+    if (this.obj.isFilled === this.lastFilled) return;
+    this.lastFilled = this.obj.isFilled;
+    this.graphics.clear();
+    this.draw();
+  }
+
   private draw(): void {
-    const key = typeKey(this.obj);
-    const color = COLORS[key] ?? 0xaaaaaa;
+    const k = typeKey(this.obj);
+    let color = COLORS[k] ?? 0xaaaaaa;
+    if (this.obj instanceof Tank && this.obj.isFilled) color = 0x2980b9;
     const g = this.graphics;
     g.rect(0, 0, PX, PX).fill({ color, alpha: 0.85 });
     g.rect(0, 0, PX, PX).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
