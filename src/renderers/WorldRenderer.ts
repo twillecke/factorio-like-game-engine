@@ -2,20 +2,17 @@ import { Container } from "pixi.js";
 import { engine } from "../core/Engine";
 import { world } from "../core/World";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
-import { type Marker } from "../entities/Marker";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
 import { Tank } from "../entities/Tank";
 import { UserObject } from "../entities/UserObject";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import { LargeUserObjectRenderer } from "./LargeUserObjectRenderer";
-import { MarkerRenderer } from "./MarkerRenderer";
 import { PipeRenderer } from "./PipeRenderer";
 import { UserObjectRenderer } from "./UserObjectRenderer";
 
 export class WorldRenderer {
   private chunkRenderers = new Map<string, ChunkRenderer>();
-  private markerRenderers = new Map<string, { r: MarkerRenderer; chunkId: string }>();
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
   private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
   private largeObjectRenderers = new Map<string, { r: LargeUserObjectRenderer; chunkId: string }>();
@@ -42,23 +39,6 @@ export class WorldRenderer {
     this.root.removeChild(r.container);
     r.destroy();
     this.chunkRenderers.delete(id);
-  }
-
-  addMarker(marker: Marker, chunkId: string): void {
-    const chunk = this.chunkRenderers.get(chunkId);
-    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
-    const r = new MarkerRenderer(marker);
-    chunk.container.addChild(r.container);
-    this.markerRenderers.set(marker.id, { r, chunkId });
-  }
-
-  removeMarker(id: string): void {
-    const entry = this.markerRenderers.get(id);
-    if (!entry) return;
-    const chunk = this.chunkRenderers.get(entry.chunkId);
-    chunk?.container.removeChild(entry.r.container);
-    entry.r.destroy();
-    this.markerRenderers.delete(id);
   }
 
   addUserObject(obj: UserObject, chunkId: string): void {
@@ -198,8 +178,6 @@ export class WorldRenderer {
     this.pipeRenderers.clear();
     for (const { r } of this.largeObjectRenderers.values()) r.destroy();
     this.largeObjectRenderers.clear();
-    for (const { r } of this.markerRenderers.values()) r.destroy();
-    this.markerRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();
     this.chunkRenderers.clear();
     this.root.destroy();
