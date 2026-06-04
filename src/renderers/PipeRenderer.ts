@@ -1,4 +1,4 @@
-import { Container, Graphics } from "pixi.js";
+import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { UserObject } from "../entities/UserObject";
 import { Pipe } from "../entities/Pipe";
 import { TILE_SIZE } from "./ChunkRenderer";
@@ -6,6 +6,13 @@ import { TILE_SIZE } from "./ChunkRenderer";
 const PX = UserObject.CELL_SIZE * TILE_SIZE;
 const COLOR_CONNECTED = 0x3498db;
 const COLOR_DISCONNECTED = 0xf1c40f;
+
+const LABEL_STYLE = new TextStyle({
+  fill: 0xffffff,
+  fontSize: 10,
+  fontWeight: "bold",
+  dropShadow: { color: 0x000000, blur: 3, distance: 0, alpha: 0.5 },
+});
 
 export class PipeRenderer {
   readonly container: Container;
@@ -20,6 +27,11 @@ export class PipeRenderer {
     this.container.y = pipe.gridY * TILE_SIZE;
     this.lastConnected = pipe.isConnected;
     this.draw();
+    const label = new Text({ text: "P", style: LABEL_STYLE });
+    label.anchor.set(0.5);
+    label.x = PX / 2;
+    label.y = PX / 2;
+    this.container.addChild(label);
   }
 
   sync(): void {
