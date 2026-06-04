@@ -1,40 +1,26 @@
 import type { System } from "../core/types";
-import { world } from "../core/World";
-import { UserObject } from "../entities/UserObject";
 import type { WorldRenderer } from "../renderers/WorldRenderer";
 
 export class InputSystem implements System {
-  private userObjectIds = new Set<string>();
-  private readonly handleClick: (e: MouseEvent) => void;
+  private readonly onCanvasClick: (e: MouseEvent) => void;
 
   constructor(
     private canvas: HTMLCanvasElement,
-    private worldRenderer: WorldRenderer,
-    private chunkId: string,
+    worldRenderer: WorldRenderer,
+    chunkId: string,
+    onCellClick: (gridX: number, gridY: number) => void,
   ) {
-    this.handleClick = (e: MouseEvent) => {
-      const coord = this.worldRenderer.screenToGrid(e.clientX, e.clientY, this.chunkId);
+    this.onCanvasClick = (e: MouseEvent) => {
+      const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
       if (!coord) return;
-      const id = `user-${coord.gridX}-${coord.gridY}`;
-      if (this.userObjectIds.has(id)) {
-        world.unregister(id);
-        this.worldRenderer.removeUserObject(id);
-        this.userObjectIds.delete(id);
-        return;
-      }
-      const obj = new UserObject(id, coord.gridX, coord.gridY);
-      world.register(obj);
-      this.worldRenderer.addUserObject(obj, this.chunkId);
-      this.userObjectIds.add(id);
+      onCellClick(coord.gridX, coord.gridY);
     };
-    canvas.addEventListener("click", this.handleClick);
+    canvas.addEventListener("click", this.onCanvasClick);
   }
 
   update(_dt: number): void {}
 
   destroy(): void {
-    this.canvas.removeEventListener("click", this.handleClick);
-    for (const id of this.userObjectIds) world.unregister(id);
-    this.userObjectIds.clear();
+    this.canvas.removeEventListener("click", this.onCanvasClick);
   }
 }

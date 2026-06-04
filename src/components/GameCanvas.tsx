@@ -7,6 +7,7 @@ import { Start } from "../entities/Start";
 import { WorldRenderer } from "../renderers/WorldRenderer";
 import { ChunkSystem } from "../systems/ChunkSystem";
 import { InputSystem } from "../systems/InputSystem";
+import { PlacementSystem } from "../systems/PlacementSystem";
 
 export function GameCanvas() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,14 +32,13 @@ export function GameCanvas() {
 			worldRenderer.addMarker(start, chunk.id);
 			worldRenderer.addMarker(end, chunk.id);
 
-			const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id);
+			const placementSystem = new PlacementSystem(worldRenderer, chunk.id);
+			const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id,
+				(x, y) => placementSystem.toggleAt(x, y),
+			);
 			world.addSystem(new ChunkSystem());
+			world.addSystem(placementSystem);
 			world.addSystem(inputSystem);
-
-      // setInterval(() => {
-      //   console.log("=== World entities ===");
-      //   world.logEntities();
-      // }, 2000);
 
 			engine.ticker.add((ticker) => {
 				world.update(ticker.deltaTime);
@@ -47,6 +47,7 @@ export function GameCanvas() {
 
 			extraCleanup = () => {
 				inputSystem.destroy();
+				placementSystem.destroy();
 				worldRenderer.destroy();
 			};
 		});
