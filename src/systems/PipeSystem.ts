@@ -18,7 +18,8 @@ export class PipeSystem implements System {
     this.resetConnections(pipes);
 
     const pipeAt = this.buildPipeMap(pipes);
-    const reachable = this.floodFill(pumps, pipeAt);
+    const filledTanks = tanks.filter((t) => t.isFilled);
+    const reachable = this.floodFill(pumps, filledTanks, pipeAt);
 
     for (const pipe of reachable) pipe.isConnected = true;
 
@@ -35,19 +36,23 @@ export class PipeSystem implements System {
     return map;
   }
 
-  private floodFill(pumps: Pump[], pipeAt: Map<string, Pipe>): Pipe[] {
+  private floodFill(pumps: Pump[], filledTanks: Tank[], pipeAt: Map<string, Pipe>): Pipe[] {
     const visited = new Set<string>();
     const queue: Pipe[] = [];
 
-    for (const pump of pumps) {
-      for (const { x, y } of this.cellsAdjacentToPump(pump)) {
-        const pipe = pipeAt.get(key(x, y));
-        if (pipe && !visited.has(key(x, y))) {
-          visited.add(key(x, y));
+    const seed = (gridX: number, gridY: number, size: number) => {
+      for (const { x, y } of this.cellsAdjacentToObject(gridX, gridY, size)) {
+        const k = key(x, y);
+        const pipe = pipeAt.get(k);
+        if (pipe && !visited.has(k)) {
+          visited.add(k);
           queue.push(pipe);
         }
       }
-    }
+    };
+
+    for (const pump of pumps) seed(pump.gridX, pump.gridY, Pump.CELL_SIZE);
+    for (const tank of filledTanks) seed(tank.gridX, tank.gridY, Tank.CELL_SIZE);
 
     const connected: Pipe[] = [];
     while (queue.length > 0) {
@@ -76,10 +81,6 @@ export class PipeSystem implements System {
         }
       }
     }
-  }
-
-  private cellsAdjacentToPump(pump: Pump): Array<{ x: number; y: number }> {
-    return this.cellsAdjacentToObject(pump.gridX, pump.gridY, Pump.CELL_SIZE);
   }
 
   private cellsAdjacentToObject(gridX: number, gridY: number, size: number): Array<{ x: number; y: number }> {
