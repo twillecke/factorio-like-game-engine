@@ -1,5 +1,5 @@
-import type { AssetType } from "../core/assetTypes";
-import { ASSET_DEFS, ASSET_LIST } from "../entities/Assets";
+import type { AssetType } from "../entities/assetTypes";
+import { ASSET_DEFS, ASSET_LIST } from "../entities/registry";
 
 interface ToolbarProps {
   selected: AssetType | null;

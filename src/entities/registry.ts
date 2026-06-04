@@ -1,4 +1,4 @@
-import type { AssetType } from "../core/assetTypes";
+import type { AssetType } from "./assetTypes";
 import { GridEntity } from "./GridEntity";
 import { Pipe } from "./Pipe";
 import { Pump } from "./Pump";

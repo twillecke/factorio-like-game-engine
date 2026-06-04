@@ -1,7 +1,7 @@
 import type { System } from "../core/types";
-import type { AssetType } from "../core/assetTypes";
+import type { AssetType } from "../entities/assetTypes";
 import { world } from "../core/World";
-import { ASSET_DEFS } from "../entities/Assets";
+import { ASSET_DEFS } from "../entities/registry";
 import { CHUNK_SIZE } from "../entities/Chunk";
 import { GridEntity } from "../entities/GridEntity";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";

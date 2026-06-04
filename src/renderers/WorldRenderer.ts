@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 import { engine } from "../core/Engine";
 import { world } from "../core/World";
-import type { AssetType } from "../core/assetTypes";
+import type { AssetType } from "../entities/assetTypes";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { GridEntity } from "../entities/GridEntity";
 import { Pipe } from "../entities/Pipe";

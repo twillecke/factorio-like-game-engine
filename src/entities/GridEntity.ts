@@ -1,4 +1,4 @@
-import type { AssetType } from "../core/assetTypes";
+import type { AssetType } from "./assetTypes";
 import type { Entity } from "../core/types";
 
 export class GridEntity implements Entity {

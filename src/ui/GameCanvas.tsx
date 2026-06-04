@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { engine } from "../core/Engine";
-import type { AssetType } from "../core/assetTypes";
+import type { AssetType } from "../entities/assetTypes";
 import { world } from "../core/World";
 import { Chunk } from "../entities/Chunk";
 import { WorldRenderer } from "../renderers/WorldRenderer";
