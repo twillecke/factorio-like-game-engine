@@ -1,4 +1,4 @@
-import type { Entity, Updatable } from "../core/types";
+import type { Entity } from "../core/types";
 
 export const CHUNK_SIZE = 16;
 
@@ -6,7 +6,7 @@ export interface Cell {
   value: number;
 }
 
-export class Chunk implements Entity, Updatable {
+export class Chunk implements Entity {
   readonly id: string;
   readonly cells: Cell[][];
   dirty = true;
@@ -26,7 +26,4 @@ export class Chunk implements Entity, Updatable {
     this.cells[y][x].value = value;
     this.dirty = true;
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update(_dt: number): void {}
 }

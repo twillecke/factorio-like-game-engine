@@ -12,11 +12,13 @@ export class WorldRenderer {
   private markerRenderers = new Map<string, { r: MarkerRenderer; chunkId: string }>();
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
   private root: Container;
+  private readonly onResize: () => void;
 
   constructor() {
     this.root = new Container();
     engine.stage.addChild(this.root);
-    engine.renderer.on("resize", () => this.layout());
+    this.onResize = () => this.layout();
+    engine.renderer.on("resize", this.onResize);
   }
 
   addChunk(chunk: Chunk): void {
@@ -95,6 +97,7 @@ export class WorldRenderer {
   }
 
   destroy(): void {
+    engine.renderer.off("resize", this.onResize);
     for (const { r } of this.userObjectRenderers.values()) r.destroy();
     this.userObjectRenderers.clear();
     for (const { r } of this.markerRenderers.values()) r.destroy();

@@ -4,19 +4,20 @@ import { world } from "../core/World";
 import { Chunk } from "../entities/Chunk";
 import { End } from "../entities/End";
 import { Start } from "../entities/Start";
-import { UserObject } from "../entities/UserObject";
 import { WorldRenderer } from "../renderers/WorldRenderer";
-
-const userObjectCounter = 0;
+import { ChunkSystem } from "../systems/ChunkSystem";
+import { InputSystem } from "../systems/InputSystem";
 
 export function GameCanvas() {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 
 	useEffect(() => {
 		const canvas = canvasRef.current!;
+		let cancelled = false;
 		let extraCleanup: (() => void) | null = null;
 
 		engine.init(canvas).then(() => {
+			if (cancelled) return;
 			const chunk = new Chunk("chunk-0");
 			const start = new Start();
 			const end = new End();
@@ -30,47 +31,30 @@ export function GameCanvas() {
 			worldRenderer.addMarker(start, chunk.id);
 			worldRenderer.addMarker(end, chunk.id);
 
+			const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id);
+			world.addSystem(new ChunkSystem());
+			world.addSystem(inputSystem);
+
+      // setInterval(() => {
+      //   console.log("=== World entities ===");
+      //   world.logEntities();
+      // }, 2000);
+
 			engine.ticker.add((ticker) => {
 				world.update(ticker.deltaTime);
 				worldRenderer.render();
 			});
 
-			const userObjectIds = new Set<string>();
-
-			const handleClick = (e: MouseEvent) => {
-				const coord = worldRenderer.screenToGrid(
-					e.clientX,
-					e.clientY,
-					chunk.id,
-				);
-				if (!coord) return;
-				const id = `user-${coord.gridX}-${coord.gridY}`;
-				if (userObjectIds.has(id)) {
-					world.unregister(id);
-					worldRenderer.removeUserObject(id);
-					userObjectIds.delete(id);
-					return;
-				}
-				const obj = new UserObject(id, coord.gridX, coord.gridY);
-				world.register(obj);
-				worldRenderer.addUserObject(obj, chunk.id);
-				userObjectIds.add(id);
-			};
-
-			canvas.addEventListener("click", handleClick);
-
 			extraCleanup = () => {
-				canvas.removeEventListener("click", handleClick);
-				for (const id of userObjectIds) world.unregister(id);
+				inputSystem.destroy();
 				worldRenderer.destroy();
 			};
 		});
 
 		return () => {
+			cancelled = true;
 			extraCleanup?.();
-			world.unregister("chunk-0");
-			world.unregister("start");
-			world.unregister("end");
+			world.reset();
 			engine.destroy();
 		};
 	}, []);
