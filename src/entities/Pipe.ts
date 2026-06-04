@@ -1,5 +1,5 @@
-import { UserObject } from "./UserObject";
+import { GridEntity } from "./GridEntity";
 
-export class Pipe extends UserObject {
+export class Pipe extends GridEntity {
   public isConnected = false;
 }

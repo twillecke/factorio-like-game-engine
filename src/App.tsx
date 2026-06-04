@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DebugPanel } from "./components/DebugPanel";
 import { GameCanvas } from "./components/GameCanvas";
 import { Toolbar } from "./components/Toolbar";
-import type { AssetType } from "./core/toolTypes";
+import type { AssetType } from "./core/assetTypes";
 
 export default function App() {
   const [tool, setTool] = useState<AssetType | null>("pipe");

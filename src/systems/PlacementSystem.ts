@@ -1,8 +1,8 @@
 import type { System } from "../core/types";
-import type { AssetType } from "../core/toolTypes";
+import type { AssetType } from "../core/assetTypes";
 import { world } from "../core/World";
-import { ASSET_DEFS } from "../entities/tools";
-import { UserObject } from "../entities/UserObject";
+import { ASSET_DEFS } from "../entities/Assets";
+import { GridEntity } from "../entities/GridEntity";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
 export class PlacementSystem implements System {
@@ -41,7 +41,7 @@ export class PlacementSystem implements System {
   }
 
   public removeAt(gridX: number, gridY: number): void {
-    const entity = world.getSpatial<UserObject>(gridX, gridY);
+    const entity = world.getSpatial<GridEntity>(gridX, gridY);
     if (!entity) return;
     for (let dx = 0; dx < entity.cellWidth; dx++)
       for (let dy = 0; dy < entity.cellHeight; dy++)

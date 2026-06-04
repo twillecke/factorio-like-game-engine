@@ -1,7 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
+import { GridEntity } from "../entities/GridEntity";
 import { Pump } from "../entities/Pump";
 import { Tank } from "../entities/Tank";
-import { UserObject } from "../entities/UserObject";
 import { TILE_SIZE } from "./ChunkRenderer";
 
 const PX = Pump.CELL_SIZE * TILE_SIZE;
@@ -23,18 +23,18 @@ const LABEL_STYLE = new TextStyle({
   dropShadow: { color: 0x000000, blur: 4, distance: 0, alpha: 0.6 },
 });
 
-function typeKey(obj: UserObject): string {
+function typeKey(obj: GridEntity): string {
   if (obj instanceof Pump) return "pump";
   if (obj instanceof Tank) return "tank";
   return "unknown";
 }
 
-export class LargeUserObjectRenderer {
+export class LargeGridEntityRenderer {
   public readonly container: Container;
   private graphics: Graphics;
   private lastFilled: boolean | null = null;
 
-  constructor(private readonly obj: UserObject) {
+  constructor(private readonly obj: GridEntity) {
     this.container = new Container();
     this.graphics = new Graphics();
     this.container.addChild(this.graphics);

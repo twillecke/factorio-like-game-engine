@@ -1,4 +1,4 @@
-import type { AssetType } from "../core/toolTypes";
+import type { AssetType } from "../core/assetTypes";
 import type { Entity } from "../core/types";
 import { Pipe } from "./Pipe";
 import { Pump } from "./Pump";

@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
-import type { AssetType } from "../core/toolTypes";
-import { ASSET_DEFS } from "../entities/tools";
+import type { AssetType } from "../core/assetTypes";
+import { ASSET_DEFS } from "../entities/Assets";
 import { TILE_SIZE } from "./ChunkRenderer";
 
 const ASSET_COLOR: Record<AssetType, number> = {

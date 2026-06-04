@@ -1,5 +1,5 @@
-import { UserObject } from "./UserObject";
+import { GridEntity } from "./GridEntity";
 
-export class Pump extends UserObject {
+export class Pump extends GridEntity {
   public static readonly CELL_SIZE = 2;
 }

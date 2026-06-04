@@ -1,6 +1,6 @@
 import type { Entity } from "../core/types";
 
-export class UserObject implements Entity {
+export class GridEntity implements Entity {
   public static readonly CELL_SIZE: number = 1;
   public static readonly CELL_WIDTH?: number;
   public static readonly CELL_HEIGHT?: number;
@@ -13,14 +13,14 @@ export class UserObject implements Entity {
   ) {}
 
   public get cellSize(): number {
-    return (this.constructor as typeof UserObject).CELL_SIZE;
+    return (this.constructor as typeof GridEntity).CELL_SIZE;
   }
 
   public get cellWidth(): number {
-    return (this.constructor as typeof UserObject).CELL_WIDTH ?? this.cellSize;
+    return (this.constructor as typeof GridEntity).CELL_WIDTH ?? this.cellSize;
   }
 
   public get cellHeight(): number {
-    return (this.constructor as typeof UserObject).CELL_HEIGHT ?? this.cellSize;
+    return (this.constructor as typeof GridEntity).CELL_HEIGHT ?? this.cellSize;
   }
 }

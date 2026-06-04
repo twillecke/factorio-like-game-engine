@@ -1,14 +1,14 @@
 import { Container, Graphics } from "pixi.js";
-import { UserObject } from "../entities/UserObject";
+import { GridEntity } from "../entities/GridEntity";
 import { TILE_SIZE } from "./ChunkRenderer";
 
-const PX = UserObject.CELL_SIZE * TILE_SIZE;
+const PX = GridEntity.CELL_SIZE * TILE_SIZE;
 
-export class UserObjectRenderer {
+export class GridEntityRenderer {
   public readonly container: Container;
   private graphics: Graphics;
 
-  constructor(obj: UserObject) {
+  constructor(obj: GridEntity) {
     this.container = new Container();
     this.graphics = new Graphics();
     this.container.addChild(this.graphics);
@@ -21,7 +21,7 @@ export class UserObjectRenderer {
 
   private draw(): void {
     const g = this.graphics;
-    g.rect(0, 0, PX, PX).fill({ color: UserObjectRenderer.COLOR, alpha: 0.9 });
+    g.rect(0, 0, PX, PX).fill({ color: GridEntityRenderer.COLOR, alpha: 0.9 });
     g.rect(0, 0, PX, PX).stroke({ width: 1, color: 0xffffff, alpha: 0.4 });
   }
 
