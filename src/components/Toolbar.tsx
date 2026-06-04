@@ -1,13 +1,8 @@
 import type { ToolType } from "../core/toolTypes";
-
-const TOOLS: { id: ToolType; label: string }[] = [
-  { id: "pipe", label: "Pipe" },
-  { id: "pump", label: "Pump" },
-  { id: "tank", label: "Tank" },
-];
+import { TOOL_DEFS, TOOL_LIST } from "../entities/tools";
 
 interface ToolbarProps {
-  selected: ToolType;
+  selected: ToolType | null;
   onSelect: (tool: ToolType) => void;
 }
 
@@ -28,7 +23,7 @@ export function Toolbar({ selected, onSelect }: ToolbarProps) {
         userSelect: "none",
       }}
     >
-      {TOOLS.map(({ id, label }) => (
+      {TOOL_LIST.map((id) => (
         <button
           key={id}
           onClick={() => onSelect(id)}
@@ -43,7 +38,7 @@ export function Toolbar({ selected, onSelect }: ToolbarProps) {
             cursor: "pointer",
           }}
         >
-          {label}
+          {TOOL_DEFS[id].label}
         </button>
       ))}
     </div>

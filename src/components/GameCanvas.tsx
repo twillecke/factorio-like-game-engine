@@ -10,7 +10,7 @@ import { PipeSystem } from "../systems/PipeSystem";
 import { PlacementSystem } from "../systems/PlacementSystem";
 
 interface GameCanvasProps {
-  tool: ToolType;
+  tool: ToolType | null;
 }
 
 export function GameCanvas({ tool }: GameCanvasProps) {
