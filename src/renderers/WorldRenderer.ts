@@ -1,10 +1,13 @@
 import { Container } from "pixi.js";
 import { engine } from "../core/Engine";
 import { type Chunk } from "../entities/Chunk";
+import { type Marker } from "../entities/Marker";
 import { CHUNK_PX, ChunkRenderer } from "./ChunkRenderer";
+import { MarkerRenderer } from "./MarkerRenderer";
 
 export class WorldRenderer {
-  private renderers = new Map<string, ChunkRenderer>();
+  private chunkRenderers = new Map<string, ChunkRenderer>();
+  private markerRenderers = new Map<string, { r: MarkerRenderer; chunkId: string }>();
   private root: Container;
 
   constructor() {
@@ -15,36 +18,55 @@ export class WorldRenderer {
 
   addChunk(chunk: Chunk): void {
     const r = new ChunkRenderer(chunk);
-    this.renderers.set(chunk.id, r);
+    this.chunkRenderers.set(chunk.id, r);
     this.root.addChild(r.container);
     this.layout();
   }
 
   removeChunk(id: string): void {
-    const r = this.renderers.get(id);
+    const r = this.chunkRenderers.get(id);
     if (!r) return;
     this.root.removeChild(r.container);
     r.destroy();
-    this.renderers.delete(id);
+    this.chunkRenderers.delete(id);
+  }
+
+  addMarker(marker: Marker, chunkId: string): void {
+    const chunk = this.chunkRenderers.get(chunkId);
+    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
+    const r = new MarkerRenderer(marker);
+    chunk.container.addChild(r.container);
+    this.markerRenderers.set(marker.id, { r, chunkId });
+  }
+
+  removeMarker(id: string): void {
+    const entry = this.markerRenderers.get(id);
+    if (!entry) return;
+    const chunk = this.chunkRenderers.get(entry.chunkId);
+    chunk?.container.removeChild(entry.r.container);
+    entry.r.destroy();
+    this.markerRenderers.delete(id);
   }
 
   render(): void {
-    for (const r of this.renderers.values()) {
+    for (const r of this.chunkRenderers.values()) {
       r.render();
     }
   }
 
   private layout(): void {
     const { width, height } = engine.screen;
-    for (const r of this.renderers.values()) {
+    for (const r of this.chunkRenderers.values()) {
       r.container.x = (width - CHUNK_PX) / 2;
       r.container.y = (height - CHUNK_PX) / 2;
     }
   }
 
   destroy(): void {
-    for (const r of this.renderers.values()) r.destroy();
-    this.renderers.clear();
+    for (const { r } of this.markerRenderers.values()) r.destroy();
+    this.markerRenderers.clear();
+    for (const r of this.chunkRenderers.values()) r.destroy();
+    this.chunkRenderers.clear();
     this.root.destroy();
   }
 }
