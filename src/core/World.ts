@@ -35,6 +35,15 @@ class World {
     this.systems = [];
   }
 
+  getEntityCounts(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const entity of this.entities.values()) {
+      const type = entity.constructor.name;
+      counts[type] = (counts[type] ?? 0) + 1;
+    }
+    return counts;
+  }
+
   logEntities(): void {
     for (const entity of this.entities.values()) {
       console.log(`${entity.constructor.name} id="${entity.id}"`);
