@@ -1,22 +1,21 @@
 import type { Entity, System } from "../core/types";
 import { world } from "../core/World";
-import { Marker } from "../entities/Marker";
 import { Pipe } from "../entities/Pipe";
-import { Start } from "../entities/Start";
+import { Pump } from "../entities/Pump";
 
 function isPipe(e: Entity): e is Pipe { return e instanceof Pipe; }
-function isStart(e: Entity): e is Start { return e instanceof Start; }
+function isPump(e: Entity): e is Pump { return e instanceof Pump; }
 function key(x: number, y: number): string { return `${x},${y}`; }
 
 export class PipeSystem implements System {
   update(_dt: number): void {
     const pipes = world.getAll(isPipe);
-    const starts = world.getAll(isStart);
+    const pumps = world.getAll(isPump);
 
     this.resetConnections(pipes);
 
     const pipeAt = this.buildPipeMap(pipes);
-    const reachable = this.floodFill(starts, pipeAt);
+    const reachable = this.floodFill(pumps, pipeAt);
 
     for (const pipe of reachable) pipe.isConnected = true;
   }
@@ -31,12 +30,12 @@ export class PipeSystem implements System {
     return map;
   }
 
-  private floodFill(starts: Start[], pipeAt: Map<string, Pipe>): Pipe[] {
+  private floodFill(pumps: Pump[], pipeAt: Map<string, Pipe>): Pipe[] {
     const visited = new Set<string>();
     const queue: Pipe[] = [];
 
-    for (const start of starts) {
-      for (const { x, y } of this.cellsAdjacentToMarker(start)) {
+    for (const pump of pumps) {
+      for (const { x, y } of this.cellsAdjacentToPump(pump)) {
         const pipe = pipeAt.get(key(x, y));
         if (pipe && !visited.has(key(x, y))) {
           visited.add(key(x, y));
@@ -61,19 +60,17 @@ export class PipeSystem implements System {
     return connected;
   }
 
-  private cellsAdjacentToMarker(marker: Marker): Array<{ x: number; y: number }> {
-    const size = Marker.CELL_SIZE;
+  private cellsAdjacentToPump(pump: Pump): Array<{ x: number; y: number }> {
+    const size = Pump.CELL_SIZE;
     const cells: Array<{ x: number; y: number }> = [];
 
-    // top and bottom edges (including corners)
     for (let dx = -1; dx <= size; dx++) {
-      cells.push({ x: marker.gridX + dx, y: marker.gridY - 1 });
-      cells.push({ x: marker.gridX + dx, y: marker.gridY + size });
+      cells.push({ x: pump.gridX + dx, y: pump.gridY - 1 });
+      cells.push({ x: pump.gridX + dx, y: pump.gridY + size });
     }
-    // left and right edges (excluding corners)
     for (let dy = 0; dy < size; dy++) {
-      cells.push({ x: marker.gridX - 1,    y: marker.gridY + dy });
-      cells.push({ x: marker.gridX + size, y: marker.gridY + dy });
+      cells.push({ x: pump.gridX - 1,    y: pump.gridY + dy });
+      cells.push({ x: pump.gridX + size, y: pump.gridY + dy });
     }
 
     return cells;
