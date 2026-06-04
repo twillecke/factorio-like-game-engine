@@ -10,7 +10,7 @@ export interface AssetDef {
   idPrefix: string;
   cellWidth: number;
   cellHeight: number;
-  create: (id: string, gridX: number, gridY: number, chunkId: string) => Entity;
+  create: (id: string, gridX: number, gridY: number, chunkId: string, rotation?: 0 | 90 | 180 | 270) => Entity;
 }
 
 export const ASSET_DEFS: Record<AssetType, AssetDef> = {
@@ -19,28 +19,28 @@ export const ASSET_DEFS: Record<AssetType, AssetDef> = {
     idPrefix: "user",
     cellWidth: Pipe.CELL_SIZE,
     cellHeight: Pipe.CELL_SIZE,
-    create: (id, x, y, chunk) => new Pipe(id, x, y, chunk),
+    create: (id, x, y, chunk, rotation = 0) => new Pipe(id, x, y, chunk, rotation),
   },
   pump: {
     label: "Pump",
     idPrefix: "pump",
     cellWidth: Pump.CELL_SIZE,
     cellHeight: Pump.CELL_SIZE,
-    create: (id, x, y, chunk) => new Pump(id, x, y, chunk),
+    create: (id, x, y, chunk, rotation = 0) => new Pump(id, x, y, chunk, rotation),
   },
   tank: {
     label: "Tank",
     idPrefix: "tank",
     cellWidth: Tank.CELL_SIZE,
     cellHeight: Tank.CELL_SIZE,
-    create: (id, x, y, chunk) => new Tank(id, x, y, chunk),
+    create: (id, x, y, chunk, rotation = 0) => new Tank(id, x, y, chunk, rotation),
   },
   steamEngine: {
     label: "Steam Engine",
     idPrefix: "steam",
     cellWidth: SteamEngine.CELL_WIDTH,
     cellHeight: SteamEngine.CELL_HEIGHT,
-    create: (id, x, y, chunk) => new SteamEngine(id, x, y, chunk),
+    create: (id, x, y, chunk, rotation = 0) => new SteamEngine(id, x, y, chunk, rotation),
   },
 };
 

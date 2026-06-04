@@ -43,6 +43,7 @@ export function GameCanvas({ tool }: GameCanvasProps) {
         (x, y) => placementSystem.removeAt(x, y),
         (x, y) => placementSystem.hoverAt(x, y),
         () => placementSystem.clearHover(),
+        () => placementSystem.rotate(),
       );
       world.addSystem(new ChunkSystem());
       world.addSystem(placementSystem);

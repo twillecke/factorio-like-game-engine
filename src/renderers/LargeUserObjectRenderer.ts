@@ -4,8 +4,6 @@ import { Pump } from "../entities/Pump";
 import { Tank } from "../entities/Tank";
 import { TILE_SIZE } from "./ChunkRenderer";
 
-const PX = Pump.CELL_SIZE * TILE_SIZE;
-
 const COLORS: Record<string, number> = {
   pump: 0x27ae60,
   tank: 0xe67e22,
@@ -53,22 +51,26 @@ export class LargeGridEntityRenderer {
   }
 
   private draw(): void {
+    const w = this.obj.effectiveCellWidth * TILE_SIZE;
+    const h = this.obj.effectiveCellHeight * TILE_SIZE;
     const k = typeKey(this.obj);
     let color = COLORS[k] ?? 0xaaaaaa;
     if (this.obj instanceof Tank && this.obj.isFilled) color = 0x2980b9;
     const g = this.graphics;
-    g.rect(0, 0, PX, PX).fill({ color, alpha: 0.85 });
-    g.rect(0, 0, PX, PX).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
+    g.rect(0, 0, w, h).fill({ color, alpha: 0.85 });
+    g.rect(0, 0, w, h).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
   }
 
   private addLabel(): void {
+    const w = this.obj.effectiveCellWidth * TILE_SIZE;
+    const h = this.obj.effectiveCellHeight * TILE_SIZE;
     const key = typeKey(this.obj);
     const label = LABELS[key];
     if (!label) return;
     const text = new Text({ text: label, style: LABEL_STYLE });
     text.anchor.set(0.5);
-    text.x = PX / 2;
-    text.y = PX / 2;
+    text.x = w / 2;
+    text.y = h / 2;
     this.container.addChild(text);
   }
 

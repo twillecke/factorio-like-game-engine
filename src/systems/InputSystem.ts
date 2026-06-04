@@ -7,6 +7,7 @@ export class InputSystem implements System {
   private readonly onPointerUp: (e: PointerEvent) => void;
   private readonly onPointerLeave: () => void;
   private readonly onWheel: (e: WheelEvent) => void;
+  private readonly onKeyDown: (e: KeyboardEvent) => void;
   private isDown = false;
   private lastCell: { gridX: number; gridY: number } | null = null;
   private isPanning = false;
@@ -21,6 +22,7 @@ export class InputSystem implements System {
     onCellRemove: (gridX: number, gridY: number) => void,
     onCellHover?: (gridX: number, gridY: number) => void,
     onHoverLeave?: () => void,
+    onRotate?: () => void,
   ) {
     this.onWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -82,11 +84,16 @@ export class InputSystem implements System {
 
     this.onPointerLeave = () => onHoverLeave?.();
 
+    this.onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "r" || e.key === "R") onRotate?.();
+    };
+
     canvas.addEventListener("pointerdown", this.onPointerDown);
     canvas.addEventListener("pointermove", this.onPointerMove);
     canvas.addEventListener("pointerleave", this.onPointerLeave);
     canvas.addEventListener("wheel", this.onWheel, { passive: false });
     window.addEventListener("pointerup", this.onPointerUp);
+    window.addEventListener("keydown", this.onKeyDown);
   }
 
   public update(_dt: number): void {}
@@ -97,5 +104,6 @@ export class InputSystem implements System {
     this.canvas.removeEventListener("pointerleave", this.onPointerLeave);
     this.canvas.removeEventListener("wheel", this.onWheel);
     window.removeEventListener("pointerup", this.onPointerUp);
+    window.removeEventListener("keydown", this.onKeyDown);
   }
 }

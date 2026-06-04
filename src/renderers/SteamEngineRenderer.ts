@@ -2,9 +2,6 @@ import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { SteamEngine } from "../entities/SteamEngine";
 import { TILE_SIZE } from "./ChunkRenderer";
 
-const W = SteamEngine.CELL_WIDTH * TILE_SIZE;
-const H = SteamEngine.CELL_HEIGHT * TILE_SIZE;
-
 const LABEL_STYLE = new TextStyle({
   fill: 0xffffff,
   fontSize: 16,
@@ -35,17 +32,21 @@ export class SteamEngineRenderer {
   }
 
   private draw(): void {
+    const w = this.engine.effectiveCellWidth * TILE_SIZE;
+    const h = this.engine.effectiveCellHeight * TILE_SIZE;
     const color = this.engine.isRunning ? 0x27ae60 : 0x7f8c8d;
     const g = this.graphics;
-    g.rect(0, 0, W, H).fill({ color, alpha: 0.85 });
-    g.rect(0, 0, W, H).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
+    g.rect(0, 0, w, h).fill({ color, alpha: 0.85 });
+    g.rect(0, 0, w, h).stroke({ width: 2, color: 0xffffff, alpha: 0.5 });
   }
 
   private addLabel(): void {
+    const w = this.engine.effectiveCellWidth * TILE_SIZE;
+    const h = this.engine.effectiveCellHeight * TILE_SIZE;
     const text = new Text({ text: "SE", style: LABEL_STYLE });
     text.anchor.set(0.5);
-    text.x = W / 2;
-    text.y = H / 2;
+    text.x = w / 2;
+    text.y = h / 2;
     this.container.addChild(text);
   }
 

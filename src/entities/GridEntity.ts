@@ -10,6 +10,7 @@ export class GridEntity implements Entity {
     public readonly gridX: number,
     public readonly gridY: number,
     public readonly chunkId: string,
+    public readonly rotation: 0 | 90 | 180 | 270 = 0,
   ) {}
 
   public get cellSize(): number {
@@ -22,5 +23,13 @@ export class GridEntity implements Entity {
 
   public get cellHeight(): number {
     return (this.constructor as typeof GridEntity).CELL_HEIGHT ?? this.cellSize;
+  }
+
+  public get effectiveCellWidth(): number {
+    return (this.rotation === 90 || this.rotation === 270) ? this.cellHeight : this.cellWidth;
+  }
+
+  public get effectiveCellHeight(): number {
+    return (this.rotation === 90 || this.rotation === 270) ? this.cellWidth : this.cellHeight;
   }
 }
