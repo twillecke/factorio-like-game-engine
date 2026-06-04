@@ -84,7 +84,7 @@ export class PipeSystem implements System {
 
   private cellsAdjacentToObject(gridX: number, gridY: number, size: number): Array<{ x: number; y: number }> {
     const cells: Array<{ x: number; y: number }> = [];
-    for (let dx = -1; dx <= size; dx++) {
+    for (let dx = 0; dx < size; dx++) {
       cells.push({ x: gridX + dx, y: gridY - 1 });
       cells.push({ x: gridX + dx, y: gridY + size });
     }
