@@ -30,7 +30,7 @@ function typeKey(obj: UserObject): string {
 }
 
 export class LargeUserObjectRenderer {
-  readonly container: Container;
+  public readonly container: Container;
   private graphics: Graphics;
   private lastFilled: boolean | null = null;
 
@@ -44,7 +44,7 @@ export class LargeUserObjectRenderer {
     this.addLabel();
   }
 
-  sync(): void {
+  public sync(): void {
     if (!(this.obj instanceof Tank)) return;
     if (this.obj.isFilled === this.lastFilled) return;
     this.lastFilled = this.obj.isFilled;
@@ -72,7 +72,7 @@ export class LargeUserObjectRenderer {
     this.container.addChild(text);
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.graphics.destroy();
     this.container.destroy();
   }

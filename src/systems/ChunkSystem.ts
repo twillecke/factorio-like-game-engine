@@ -7,7 +7,7 @@ function isChunk(e: object): e is Chunk {
 }
 
 export class ChunkSystem implements System {
-  update(_dt: number): void {
+  public update(_dt: number): void {
     const chunks = world.getAll(isChunk);
     for (const chunk of chunks) {
       void chunk; // placeholder — belt/production logic goes here

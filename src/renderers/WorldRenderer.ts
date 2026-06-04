@@ -17,7 +17,7 @@ export class WorldRenderer {
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
   private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
   private largeObjectRenderers = new Map<string, { r: LargeUserObjectRenderer; chunkId: string }>();
-  readonly preview = new PreviewRenderer();
+  public readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
 
@@ -28,7 +28,7 @@ export class WorldRenderer {
     engine.renderer.on("resize", this.onResize);
   }
 
-  addChunk(chunk: Chunk): void {
+  public addChunk(chunk: Chunk): void {
     const r = new ChunkRenderer(chunk);
     this.chunkRenderers.set(chunk.id, r);
     this.root.addChild(r.container);
@@ -36,7 +36,7 @@ export class WorldRenderer {
     this.layout();
   }
 
-  removeChunk(id: string): void {
+  public removeChunk(id: string): void {
     const r = this.chunkRenderers.get(id);
     if (!r) return;
     this.root.removeChild(r.container);
@@ -44,7 +44,7 @@ export class WorldRenderer {
     this.chunkRenderers.delete(id);
   }
 
-  addUserObject(obj: UserObject, chunkId: string): void {
+  public addUserObject(obj: UserObject, chunkId: string): void {
     this.removeUserObject(obj.id);
     const chunk = this.chunkRenderers.get(chunkId);
     if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
@@ -53,7 +53,7 @@ export class WorldRenderer {
     this.userObjectRenderers.set(obj.id, { r, chunkId });
   }
 
-  removeUserObject(id: string): void {
+  public removeUserObject(id: string): void {
     const entry = this.userObjectRenderers.get(id);
     if (!entry) return;
     const chunk = this.chunkRenderers.get(entry.chunkId);
@@ -62,7 +62,7 @@ export class WorldRenderer {
     this.userObjectRenderers.delete(id);
   }
 
-  screenToGrid(screenX: number, screenY: number, chunkId: string): { gridX: number; gridY: number } | null {
+  public screenToGrid(screenX: number, screenY: number, chunkId: string): { gridX: number; gridY: number } | null {
     const r = this.chunkRenderers.get(chunkId);
     if (!r) return null;
     const local = r.container.toLocal({ x: screenX, y: screenY });
@@ -75,7 +75,7 @@ export class WorldRenderer {
   private static readonly MIN_ZOOM = 0.25;
   private static readonly MAX_ZOOM = 4;
 
-  zoomAtPoint(screenX: number, screenY: number, factor: number): void {
+  public zoomAtPoint(screenX: number, screenY: number, factor: number): void {
     const oldScale = this.root.scale.x;
     const newScale = Math.max(WorldRenderer.MIN_ZOOM, Math.min(WorldRenderer.MAX_ZOOM, oldScale * factor));
     if (newScale === oldScale) return;
@@ -84,12 +84,12 @@ export class WorldRenderer {
     this.root.scale.set(newScale);
   }
 
-  pan(dx: number, dy: number): void {
+  public pan(dx: number, dy: number): void {
     this.root.x += dx;
     this.root.y += dy;
   }
 
-  addPipe(pipe: Pipe, chunkId: string): void {
+  public addPipe(pipe: Pipe, chunkId: string): void {
     this.removePipe(pipe.id);
     const chunk = this.chunkRenderers.get(chunkId);
     if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
@@ -98,7 +98,7 @@ export class WorldRenderer {
     this.pipeRenderers.set(pipe.id, { r, chunkId });
   }
 
-  removePipe(id: string): void {
+  public removePipe(id: string): void {
     const entry = this.pipeRenderers.get(id);
     if (!entry) return;
     const chunk = this.chunkRenderers.get(entry.chunkId);
@@ -107,7 +107,7 @@ export class WorldRenderer {
     this.pipeRenderers.delete(id);
   }
 
-  addLargeObject(obj: UserObject, chunkId: string): void {
+  public addLargeObject(obj: UserObject, chunkId: string): void {
     this.removeLargeObject(obj.id);
     const chunk = this.chunkRenderers.get(chunkId);
     if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
@@ -116,7 +116,7 @@ export class WorldRenderer {
     this.largeObjectRenderers.set(obj.id, { r, chunkId });
   }
 
-  removeLargeObject(id: string): void {
+  public removeLargeObject(id: string): void {
     const entry = this.largeObjectRenderers.get(id);
     if (!entry) return;
     const chunk = this.chunkRenderers.get(entry.chunkId);
@@ -125,7 +125,7 @@ export class WorldRenderer {
     this.largeObjectRenderers.delete(id);
   }
 
-  render(): void {
+  public render(): void {
     this.syncUserObjects();
     this.syncPipes();
     this.syncLargeObjects();
@@ -170,15 +170,15 @@ export class WorldRenderer {
     }
   }
 
-  isUserObject(e: object): e is UserObject {
+  public isUserObject(e: object): e is UserObject {
     return e instanceof UserObject && !(e instanceof Pipe) && !(e instanceof Pump) && !(e instanceof Tank);
   }
 
-  isPipe(e: object): e is Pipe {
+  public isPipe(e: object): e is Pipe {
     return e instanceof Pipe;
   }
 
-  isLargeObject(e: object): e is UserObject {
+  public isLargeObject(e: object): e is UserObject {
     return e instanceof Pump || e instanceof Tank;
   }
 
@@ -192,7 +192,7 @@ export class WorldRenderer {
     this.root.y = (height - CHUNK_PX) / 2;
   }
 
-  destroy(): void {
+  public destroy(): void {
     engine.renderer.off("resize", this.onResize);
     for (const { r } of this.userObjectRenderers.values()) r.destroy();
     this.userObjectRenderers.clear();

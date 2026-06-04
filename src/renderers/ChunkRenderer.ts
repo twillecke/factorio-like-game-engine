@@ -5,7 +5,7 @@ export const TILE_SIZE = 32;
 export const CHUNK_PX = CHUNK_SIZE * TILE_SIZE;
 
 export class ChunkRenderer {
-  readonly container: Container;
+  public readonly container: Container;
   private graphics: Graphics;
 
   constructor(private readonly chunk: Chunk) {
@@ -14,7 +14,7 @@ export class ChunkRenderer {
     this.container.addChild(this.graphics);
   }
 
-  render(): void {
+  public render(): void {
     if (!this.chunk.dirty) return;
     this.draw();
     this.chunk.dirty = false;
@@ -42,7 +42,7 @@ export class ChunkRenderer {
     g.rect(0, 0, CHUNK_PX, CHUNK_PX).stroke({ width: 2, color: 0x6a6aaa });
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.graphics.destroy();
     this.container.destroy();
   }

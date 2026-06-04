@@ -5,7 +5,7 @@ import { TILE_SIZE } from "./ChunkRenderer";
 const PX = UserObject.CELL_SIZE * TILE_SIZE;
 
 export class UserObjectRenderer {
-  readonly container: Container;
+  public readonly container: Container;
   private graphics: Graphics;
 
   constructor(private readonly obj: UserObject) {
@@ -25,7 +25,7 @@ export class UserObjectRenderer {
     g.rect(0, 0, PX, PX).stroke({ width: 1, color: 0xffffff, alpha: 0.4 });
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.graphics.destroy();
     this.container.destroy();
   }

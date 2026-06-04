@@ -1,16 +1,16 @@
 import type { Entity } from "../core/types";
 
 export class UserObject implements Entity {
-  static readonly CELL_SIZE = 1;
+  public static readonly CELL_SIZE = 1;
 
   constructor(
-    readonly id: string,
-    readonly gridX: number,
-    readonly gridY: number,
-    readonly chunkId: string,
+    public readonly id: string,
+    public readonly gridX: number,
+    public readonly gridY: number,
+    public readonly chunkId: string,
   ) {}
 
-  get cellSize(): number {
+  public get cellSize(): number {
     return (this.constructor as typeof UserObject).CELL_SIZE;
   }
 }

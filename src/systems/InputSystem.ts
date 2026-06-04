@@ -89,9 +89,9 @@ export class InputSystem implements System {
     window.addEventListener("pointerup", this.onPointerUp);
   }
 
-  update(_dt: number): void {}
+  public update(_dt: number): void {}
 
-  destroy(): void {
+  public destroy(): void {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);
     this.canvas.removeEventListener("pointermove", this.onPointerMove);
     this.canvas.removeEventListener("pointerleave", this.onPointerLeave);

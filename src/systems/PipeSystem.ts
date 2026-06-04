@@ -10,7 +10,7 @@ function isTank(e: Entity): e is Tank { return e instanceof Tank; }
 function key(x: number, y: number): string { return `${x},${y}`; }
 
 export class PipeSystem implements System {
-  update(_dt: number): void {
+  public update(_dt: number): void {
     const pipes = world.getAll(isPipe);
     const pumps = world.getAll(isPump);
     const tanks = world.getAll(isTank);

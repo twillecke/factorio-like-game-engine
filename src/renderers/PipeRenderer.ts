@@ -15,7 +15,7 @@ const LABEL_STYLE = new TextStyle({
 });
 
 export class PipeRenderer {
-  readonly container: Container;
+  public readonly container: Container;
   private graphics: Graphics;
   private lastConnected: boolean;
 
@@ -34,7 +34,7 @@ export class PipeRenderer {
     this.container.addChild(label);
   }
 
-  sync(): void {
+  public sync(): void {
     if (this.pipe.isConnected !== this.lastConnected) {
       this.lastConnected = this.pipe.isConnected;
       this.graphics.clear();
@@ -49,7 +49,7 @@ export class PipeRenderer {
     g.rect(0, 0, PX, PX).stroke({ width: 1, color: 0xffffff, alpha: 0.4 });
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.graphics.destroy();
     this.container.destroy();
   }

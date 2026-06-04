@@ -15,7 +15,7 @@ export class PreviewRenderer {
   private graphics = new Graphics();
   private container: Container | null = null;
 
-  attach(container: Container): void {
+  public attach(container: Container): void {
     if (this.container) this.container.removeChild(this.graphics);
     this.container = container;
     container.sortableChildren = true;
@@ -23,7 +23,7 @@ export class PreviewRenderer {
     container.addChild(this.graphics);
   }
 
-  update(tool: ToolType, gridX: number, gridY: number, isValid: boolean): void {
+  public update(tool: ToolType, gridX: number, gridY: number, isValid: boolean): void {
     const size = TOOL_DEFS[tool].cellSize * TILE_SIZE;
     const color = isValid ? TOOL_COLOR[tool] : INVALID_COLOR;
     this.graphics.clear();
@@ -32,11 +32,11 @@ export class PreviewRenderer {
     this.graphics.y = gridY * TILE_SIZE;
   }
 
-  clear(): void {
+  public clear(): void {
     this.graphics.clear();
   }
 
-  destroy(): void {
+  public destroy(): void {
     this.graphics.destroy();
   }
 }

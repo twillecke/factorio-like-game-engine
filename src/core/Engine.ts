@@ -3,28 +3,28 @@ import { Application } from "pixi.js";
 class Engine {
   private _app: Application | null = null;
 
-  get app(): Application {
+  public get app(): Application {
     if (!this._app) throw new Error("Engine not initialized");
     return this._app;
   }
 
-  get ticker() {
+  public get ticker() {
     return this.app.ticker;
   }
 
-  get screen() {
+  public get screen() {
     return this.app.screen;
   }
 
-  get stage() {
+  public get stage() {
     return this.app.stage;
   }
 
-  get renderer() {
+  public get renderer() {
     return this.app.renderer;
   }
 
-  async init(canvas: HTMLCanvasElement): Promise<void> {
+  public async init(canvas: HTMLCanvasElement): Promise<void> {
     if (this._app) {
       this._app.destroy();
       this._app = null;
@@ -38,7 +38,7 @@ class Engine {
     });
   }
 
-  destroy(): void {
+  public destroy(): void {
     if (!this._app) return;
     this._app.destroy();
     this._app = null;

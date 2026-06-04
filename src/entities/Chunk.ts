@@ -7,9 +7,9 @@ export interface Cell {
 }
 
 export class Chunk implements Entity {
-  readonly id: string;
-  readonly cells: Cell[][];
-  dirty = true;
+  public readonly id: string;
+  public readonly cells: Cell[][];
+  public dirty = true;
 
   constructor(id: string) {
     this.id = id;
@@ -18,11 +18,11 @@ export class Chunk implements Entity {
     );
   }
 
-  getCell(x: number, y: number): Cell {
+  public getCell(x: number, y: number): Cell {
     return this.cells[y][x];
   }
 
-  setCell(x: number, y: number, value: number): void {
+  public setCell(x: number, y: number, value: number): void {
     this.cells[y][x].value = value;
     this.dirty = true;
   }

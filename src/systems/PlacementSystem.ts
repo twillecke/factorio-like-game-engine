@@ -10,21 +10,21 @@ export class PlacementSystem implements System {
 
   constructor(private chunkId: string, private preview: PreviewRenderer) {}
 
-  setTool(tool: ToolType | null): void {
+  public setTool(tool: ToolType | null): void {
     this.tool = tool;
     if (!tool) this.preview.clear();
   }
 
-  hoverAt(gridX: number, gridY: number): void {
+  public hoverAt(gridX: number, gridY: number): void {
     if (!this.tool) return;
     this.preview.update(this.tool, gridX, gridY, this.canPlace(gridX, gridY));
   }
 
-  clearHover(): void {
+  public clearHover(): void {
     this.preview.clear();
   }
 
-  placeAt(gridX: number, gridY: number): void {
+  public placeAt(gridX: number, gridY: number): void {
     if (!this.tool) return;
     const def = TOOL_DEFS[this.tool];
 
@@ -40,7 +40,7 @@ export class PlacementSystem implements System {
         world.setSpatial(gridX + dx, gridY + dy, entity);
   }
 
-  removeAt(gridX: number, gridY: number): void {
+  public removeAt(gridX: number, gridY: number): void {
     const entity = world.getSpatial<UserObject>(gridX, gridY);
     if (!entity) return;
     for (let dx = 0; dx < entity.cellSize; dx++)
@@ -49,7 +49,7 @@ export class PlacementSystem implements System {
     world.unregister(entity.id);
   }
 
-  update(_dt: number): void {}
+  public update(_dt: number): void {}
 
   private canPlace(gridX: number, gridY: number): boolean {
     if (!this.tool) return false;
