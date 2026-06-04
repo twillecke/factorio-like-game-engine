@@ -23,6 +23,8 @@ export class PreviewRenderer {
   attach(container: Container): void {
     if (this.container) this.container.removeChild(this.graphics);
     this.container = container;
+    container.sortableChildren = true;
+    this.graphics.zIndex = 1000;
     container.addChild(this.graphics);
   }
 
