@@ -2,6 +2,7 @@ import type { System } from "../core/types";
 import type { AssetType } from "../core/assetTypes";
 import { world } from "../core/World";
 import { ASSET_DEFS } from "../entities/Assets";
+import { CHUNK_SIZE } from "../entities/Chunk";
 import { GridEntity } from "../entities/GridEntity";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
@@ -26,11 +27,8 @@ export class PlacementSystem implements System {
 
   public placeAt(gridX: number, gridY: number): void {
     if (!this.tool) return;
+    if (!this.canPlace(gridX, gridY)) return;
     const def = ASSET_DEFS[this.tool];
-
-    for (let dx = 0; dx < def.cellWidth; dx++)
-      for (let dy = 0; dy < def.cellHeight; dy++)
-        if (this.isOccupied(gridX + dx, gridY + dy)) return;
 
     const id = `${def.idPrefix}-${gridX}-${gridY}`;
     const entity = def.create(id, gridX, gridY, this.chunkId);
@@ -56,11 +54,15 @@ export class PlacementSystem implements System {
     const def = ASSET_DEFS[this.tool];
     for (let dx = 0; dx < def.cellWidth; dx++)
       for (let dy = 0; dy < def.cellHeight; dy++)
-        if (this.isOccupied(gridX + dx, gridY + dy)) return false;
+        if (this.isOutOfBounds(gridX + dx, gridY + dy) || this.isOccupied(gridX + dx, gridY + dy)) return false;
     return true;
   }
 
   private isOccupied(x: number, y: number): boolean {
     return world.getSpatial(x, y) !== undefined;
+  }
+
+  private isOutOfBounds(x: number, y: number): boolean {
+    return x < 0 || y < 0 || x >= CHUNK_SIZE || y >= CHUNK_SIZE;
   }
 }
