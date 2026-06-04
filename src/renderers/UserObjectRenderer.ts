@@ -8,7 +8,7 @@ export class UserObjectRenderer {
   public readonly container: Container;
   private graphics: Graphics;
 
-  constructor(private readonly obj: UserObject) {
+  constructor(obj: UserObject) {
     this.container = new Container();
     this.graphics = new Graphics();
     this.container.addChild(this.graphics);

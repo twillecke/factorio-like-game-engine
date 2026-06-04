@@ -2,11 +2,13 @@ import type { Entity, System } from "../core/types";
 import { world } from "../core/World";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
+import { SteamEngine } from "../entities/SteamEngine";
 import { Tank } from "../entities/Tank";
 
 function isPipe(e: Entity): e is Pipe { return e instanceof Pipe; }
 function isPump(e: Entity): e is Pump { return e instanceof Pump; }
 function isTank(e: Entity): e is Tank { return e instanceof Tank; }
+function isSteamEngine(e: Entity): e is SteamEngine { return e instanceof SteamEngine; }
 function key(x: number, y: number): string { return `${x},${y}`; }
 
 export class PipeSystem implements System {
@@ -14,6 +16,7 @@ export class PipeSystem implements System {
     const pipes = world.getAll(isPipe);
     const pumps = world.getAll(isPump);
     const tanks = world.getAll(isTank);
+    const steamEngines = world.getAll(isSteamEngine);
 
     this.resetConnections(pipes);
 
@@ -24,6 +27,7 @@ export class PipeSystem implements System {
     for (const pipe of reachable) pipe.isConnected = true;
 
     this.fillConnectedTanks(tanks, reachable);
+    this.updateSteamEngines(steamEngines, reachable, tanks);
   }
 
   private resetConnections(pipes: Pipe[]): void {
@@ -40,8 +44,8 @@ export class PipeSystem implements System {
     const visited = new Set<string>();
     const queue: Pipe[] = [];
 
-    const seed = (gridX: number, gridY: number, size: number) => {
-      for (const { x, y } of this.cellsAdjacentToObject(gridX, gridY, size)) {
+    const seed = (gridX: number, gridY: number, w: number, h: number) => {
+      for (const { x, y } of this.cellsAdjacentToObject(gridX, gridY, w, h)) {
         const k = key(x, y);
         const pipe = pipeAt.get(k);
         if (pipe && !visited.has(k)) {
@@ -51,8 +55,8 @@ export class PipeSystem implements System {
       }
     };
 
-    for (const pump of pumps) seed(pump.gridX, pump.gridY, Pump.CELL_SIZE);
-    for (const tank of filledTanks) seed(tank.gridX, tank.gridY, Tank.CELL_SIZE);
+    for (const pump of pumps) seed(pump.gridX, pump.gridY, Pump.CELL_SIZE, Pump.CELL_SIZE);
+    for (const tank of filledTanks) seed(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE);
 
     const connected: Pipe[] = [];
     while (queue.length > 0) {
@@ -74,7 +78,7 @@ export class PipeSystem implements System {
     const connectedKeys = new Set(connectedPipes.map(p => key(p.gridX, p.gridY)));
     for (const tank of tanks) {
       if (tank.isFilled) continue;
-      for (const { x, y } of this.cellsAdjacentToObject(tank.gridX, tank.gridY, Tank.CELL_SIZE)) {
+      for (const { x, y } of this.cellsAdjacentToObject(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE)) {
         if (connectedKeys.has(key(x, y))) {
           tank.isFilled = true;
           break;
@@ -83,15 +87,35 @@ export class PipeSystem implements System {
     }
   }
 
-  private cellsAdjacentToObject(gridX: number, gridY: number, size: number): Array<{ x: number; y: number }> {
-    const cells: Array<{ x: number; y: number }> = [];
-    for (let dx = 0; dx < size; dx++) {
-      cells.push({ x: gridX + dx, y: gridY - 1 });
-      cells.push({ x: gridX + dx, y: gridY + size });
+  private updateSteamEngines(engines: SteamEngine[], connectedPipes: Pipe[], tanks: Tank[]): void {
+    const connectedKeys = new Set(connectedPipes.map(p => key(p.gridX, p.gridY)));
+    const filledTankAdjKeys = new Set<string>();
+    for (const tank of tanks) {
+      if (!tank.isFilled) continue;
+      for (const { x, y } of this.cellsAdjacentToObject(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE))
+        filledTankAdjKeys.add(key(x, y));
     }
-    for (let dy = 0; dy < size; dy++) {
-      cells.push({ x: gridX - 1,    y: gridY + dy });
-      cells.push({ x: gridX + size, y: gridY + dy });
+    for (const engine of engines) {
+      engine.isRunning = false;
+      for (const { x, y } of this.cellsAdjacentToObject(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT)) {
+        const k = key(x, y);
+        if (connectedKeys.has(k) || filledTankAdjKeys.has(k)) {
+          engine.isRunning = true;
+          break;
+        }
+      }
+    }
+  }
+
+  private cellsAdjacentToObject(gridX: number, gridY: number, w: number, h: number): Array<{ x: number; y: number }> {
+    const cells: Array<{ x: number; y: number }> = [];
+    for (let dx = 0; dx < w; dx++) {
+      cells.push({ x: gridX + dx, y: gridY - 1 });
+      cells.push({ x: gridX + dx, y: gridY + h });
+    }
+    for (let dy = 0; dy < h; dy++) {
+      cells.push({ x: gridX - 1, y: gridY + dy });
+      cells.push({ x: gridX + w, y: gridY + dy });
     }
     return cells;
   }

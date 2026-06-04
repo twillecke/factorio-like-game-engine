@@ -1,1 +1,1 @@
-export type ToolType = "pipe" | "pump" | "tank";
+export type AssetType = "pipe" | "pump" | "tank" | "steamEngine";

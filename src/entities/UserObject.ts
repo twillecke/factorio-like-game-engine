@@ -1,7 +1,9 @@
 import type { Entity } from "../core/types";
 
 export class UserObject implements Entity {
-  public static readonly CELL_SIZE = 1;
+  public static readonly CELL_SIZE: number = 1;
+  public static readonly CELL_WIDTH?: number;
+  public static readonly CELL_HEIGHT?: number;
 
   constructor(
     public readonly id: string,
@@ -12,5 +14,13 @@ export class UserObject implements Entity {
 
   public get cellSize(): number {
     return (this.constructor as typeof UserObject).CELL_SIZE;
+  }
+
+  public get cellWidth(): number {
+    return (this.constructor as typeof UserObject).CELL_WIDTH ?? this.cellSize;
+  }
+
+  public get cellHeight(): number {
+    return (this.constructor as typeof UserObject).CELL_HEIGHT ?? this.cellSize;
   }
 }

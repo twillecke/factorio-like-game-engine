@@ -1,35 +1,47 @@
-import type { ToolType } from "../core/toolTypes";
+import type { AssetType } from "../core/toolTypes";
 import type { Entity } from "../core/types";
 import { Pipe } from "./Pipe";
 import { Pump } from "./Pump";
+import { SteamEngine } from "./SteamEngine";
 import { Tank } from "./Tank";
 
-export interface ToolDef {
+export interface AssetDef {
   label: string;
   idPrefix: string;
-  cellSize: number;
+  cellWidth: number;
+  cellHeight: number;
   create: (id: string, gridX: number, gridY: number, chunkId: string) => Entity;
 }
 
-export const TOOL_DEFS: Record<ToolType, ToolDef> = {
+export const ASSET_DEFS: Record<AssetType, AssetDef> = {
   pipe: {
     label: "Pipe",
     idPrefix: "user",
-    cellSize: Pipe.CELL_SIZE,
+    cellWidth: Pipe.CELL_SIZE,
+    cellHeight: Pipe.CELL_SIZE,
     create: (id, x, y, chunk) => new Pipe(id, x, y, chunk),
   },
   pump: {
     label: "Pump",
     idPrefix: "pump",
-    cellSize: Pump.CELL_SIZE,
+    cellWidth: Pump.CELL_SIZE,
+    cellHeight: Pump.CELL_SIZE,
     create: (id, x, y, chunk) => new Pump(id, x, y, chunk),
   },
   tank: {
     label: "Tank",
     idPrefix: "tank",
-    cellSize: Tank.CELL_SIZE,
+    cellWidth: Tank.CELL_SIZE,
+    cellHeight: Tank.CELL_SIZE,
     create: (id, x, y, chunk) => new Tank(id, x, y, chunk),
+  },
+  steamEngine: {
+    label: "Steam Engine",
+    idPrefix: "steam",
+    cellWidth: SteamEngine.CELL_WIDTH,
+    cellHeight: SteamEngine.CELL_HEIGHT,
+    create: (id, x, y, chunk) => new SteamEngine(id, x, y, chunk),
   },
 };
 
-export const TOOL_LIST = Object.keys(TOOL_DEFS) as ToolType[];
+export const ASSET_LIST = Object.keys(ASSET_DEFS) as AssetType[];

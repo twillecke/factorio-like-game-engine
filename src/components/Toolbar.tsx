@@ -1,9 +1,9 @@
-import type { ToolType } from "../core/toolTypes";
-import { TOOL_DEFS, TOOL_LIST } from "../entities/tools";
+import type { AssetType } from "../core/toolTypes";
+import { ASSET_DEFS, ASSET_LIST } from "../entities/tools";
 
 interface ToolbarProps {
-  selected: ToolType | null;
-  onSelect: (tool: ToolType) => void;
+  selected: AssetType | null;
+  onSelect: (asset: AssetType) => void;
 }
 
 export function Toolbar({ selected, onSelect }: ToolbarProps) {
@@ -23,7 +23,7 @@ export function Toolbar({ selected, onSelect }: ToolbarProps) {
         userSelect: "none",
       }}
     >
-      {TOOL_LIST.map((id) => (
+      {ASSET_LIST.map((id) => (
         <button
           key={id}
           onClick={() => onSelect(id)}
@@ -38,7 +38,7 @@ export function Toolbar({ selected, onSelect }: ToolbarProps) {
             cursor: "pointer",
           }}
         >
-          {TOOL_DEFS[id].label}
+          {ASSET_DEFS[id].label}
         </button>
       ))}
     </div>

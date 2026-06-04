@@ -4,12 +4,14 @@ import { world } from "../core/World";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
+import { SteamEngine } from "../entities/SteamEngine";
 import { Tank } from "../entities/Tank";
 import { UserObject } from "../entities/UserObject";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import { LargeUserObjectRenderer } from "./LargeUserObjectRenderer";
 import { PipeRenderer } from "./PipeRenderer";
 import { PreviewRenderer } from "./PreviewRenderer";
+import { SteamEngineRenderer } from "./SteamEngineRenderer";
 import { UserObjectRenderer } from "./UserObjectRenderer";
 
 export class WorldRenderer {
@@ -17,6 +19,7 @@ export class WorldRenderer {
   private userObjectRenderers = new Map<string, { r: UserObjectRenderer; chunkId: string }>();
   private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
   private largeObjectRenderers = new Map<string, { r: LargeUserObjectRenderer; chunkId: string }>();
+  private steamEngineRenderers = new Map<string, { r: SteamEngineRenderer; chunkId: string }>();
   public readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
@@ -124,12 +127,32 @@ export class WorldRenderer {
     this.largeObjectRenderers.delete(id);
   }
 
+  public addSteamEngine(obj: SteamEngine, chunkId: string): void {
+    this.removeSteamEngine(obj.id);
+    const chunk = this.chunkRenderers.get(chunkId);
+    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
+    const r = new SteamEngineRenderer(obj);
+    chunk.container.addChild(r.container);
+    this.steamEngineRenderers.set(obj.id, { r, chunkId });
+  }
+
+  public removeSteamEngine(id: string): void {
+    const entry = this.steamEngineRenderers.get(id);
+    if (!entry) return;
+    const chunk = this.chunkRenderers.get(entry.chunkId);
+    chunk?.container.removeChild(entry.r.container);
+    entry.r.destroy();
+    this.steamEngineRenderers.delete(id);
+  }
+
   public render(): void {
     this.syncUserObjects();
     this.syncPipes();
     this.syncLargeObjects();
+    this.syncSteamEngines();
     for (const { r } of this.pipeRenderers.values()) r.sync();
     for (const { r } of this.largeObjectRenderers.values()) r.sync();
+    for (const { r } of this.steamEngineRenderers.values()) r.sync();
     for (const r of this.chunkRenderers.values()) r.render();
   }
 
@@ -169,8 +192,20 @@ export class WorldRenderer {
     }
   }
 
+  private syncSteamEngines(): void {
+    const worldObjs = world.getAll(this.isSteamEngine);
+    const worldIds = new Set(worldObjs.map((o) => o.id));
+
+    for (const id of [...this.steamEngineRenderers.keys()]) {
+      if (!worldIds.has(id)) this.removeSteamEngine(id);
+    }
+    for (const obj of worldObjs) {
+      if (!this.steamEngineRenderers.has(obj.id)) this.addSteamEngine(obj, obj.chunkId);
+    }
+  }
+
   public isUserObject(e: object): e is UserObject {
-    return e instanceof UserObject && !(e instanceof Pipe) && !(e instanceof Pump) && !(e instanceof Tank);
+    return e instanceof UserObject && !(e instanceof Pipe) && !(e instanceof Pump) && !(e instanceof Tank) && !(e instanceof SteamEngine);
   }
 
   public isPipe(e: object): e is Pipe {
@@ -179,6 +214,10 @@ export class WorldRenderer {
 
   public isLargeObject(e: object): e is UserObject {
     return e instanceof Pump || e instanceof Tank;
+  }
+
+  public isSteamEngine(e: object): e is SteamEngine {
+    return e instanceof SteamEngine;
   }
 
   private layout(): void {
@@ -199,6 +238,8 @@ export class WorldRenderer {
     this.pipeRenderers.clear();
     for (const { r } of this.largeObjectRenderers.values()) r.destroy();
     this.largeObjectRenderers.clear();
+    for (const { r } of this.steamEngineRenderers.values()) r.destroy();
+    this.steamEngineRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();
     this.chunkRenderers.clear();
     this.preview.destroy();

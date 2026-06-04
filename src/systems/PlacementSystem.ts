@@ -1,16 +1,16 @@
 import type { System } from "../core/types";
-import type { ToolType } from "../core/toolTypes";
+import type { AssetType } from "../core/toolTypes";
 import { world } from "../core/World";
-import { TOOL_DEFS } from "../entities/tools";
+import { ASSET_DEFS } from "../entities/tools";
 import { UserObject } from "../entities/UserObject";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
 export class PlacementSystem implements System {
-  private tool: ToolType | null = "pipe";
+  private tool: AssetType | null = "pipe";
 
   constructor(private chunkId: string, private preview: PreviewRenderer) {}
 
-  public setTool(tool: ToolType | null): void {
+  public setTool(tool: AssetType | null): void {
     this.tool = tool;
     if (!tool) this.preview.clear();
   }
@@ -26,25 +26,25 @@ export class PlacementSystem implements System {
 
   public placeAt(gridX: number, gridY: number): void {
     if (!this.tool) return;
-    const def = TOOL_DEFS[this.tool];
+    const def = ASSET_DEFS[this.tool];
 
-    for (let dx = 0; dx < def.cellSize; dx++)
-      for (let dy = 0; dy < def.cellSize; dy++)
+    for (let dx = 0; dx < def.cellWidth; dx++)
+      for (let dy = 0; dy < def.cellHeight; dy++)
         if (this.isOccupied(gridX + dx, gridY + dy)) return;
 
     const id = `${def.idPrefix}-${gridX}-${gridY}`;
     const entity = def.create(id, gridX, gridY, this.chunkId);
     world.register(entity);
-    for (let dx = 0; dx < def.cellSize; dx++)
-      for (let dy = 0; dy < def.cellSize; dy++)
+    for (let dx = 0; dx < def.cellWidth; dx++)
+      for (let dy = 0; dy < def.cellHeight; dy++)
         world.setSpatial(gridX + dx, gridY + dy, entity);
   }
 
   public removeAt(gridX: number, gridY: number): void {
     const entity = world.getSpatial<UserObject>(gridX, gridY);
     if (!entity) return;
-    for (let dx = 0; dx < entity.cellSize; dx++)
-      for (let dy = 0; dy < entity.cellSize; dy++)
+    for (let dx = 0; dx < entity.cellWidth; dx++)
+      for (let dy = 0; dy < entity.cellHeight; dy++)
         world.clearSpatial(entity.gridX + dx, entity.gridY + dy);
     world.unregister(entity.id);
   }
@@ -53,9 +53,9 @@ export class PlacementSystem implements System {
 
   private canPlace(gridX: number, gridY: number): boolean {
     if (!this.tool) return false;
-    const { cellSize } = TOOL_DEFS[this.tool];
-    for (let dx = 0; dx < cellSize; dx++)
-      for (let dy = 0; dy < cellSize; dy++)
+    const def = ASSET_DEFS[this.tool];
+    for (let dx = 0; dx < def.cellWidth; dx++)
+      for (let dy = 0; dy < def.cellHeight; dy++)
         if (this.isOccupied(gridX + dx, gridY + dy)) return false;
     return true;
   }

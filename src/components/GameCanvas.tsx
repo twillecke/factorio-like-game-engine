@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { engine } from "../core/Engine";
-import type { ToolType } from "../core/toolTypes";
+import type { AssetType } from "../core/toolTypes";
 import { world } from "../core/World";
 import { Chunk } from "../entities/Chunk";
 import { WorldRenderer } from "../renderers/WorldRenderer";
@@ -10,7 +10,7 @@ import { PipeSystem } from "../systems/PipeSystem";
 import { PlacementSystem } from "../systems/PlacementSystem";
 
 interface GameCanvasProps {
-  tool: ToolType | null;
+  tool: AssetType | null;
 }
 
 export function GameCanvas({ tool }: GameCanvasProps) {
