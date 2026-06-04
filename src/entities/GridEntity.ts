@@ -1,3 +1,4 @@
+import type { AssetType } from "../core/assetTypes";
 import type { Entity } from "../core/types";
 
 export class GridEntity implements Entity {
@@ -10,6 +11,7 @@ export class GridEntity implements Entity {
     public readonly gridX: number,
     public readonly gridY: number,
     public readonly chunkId: string,
+    public readonly assetType: AssetType,
     public readonly rotation: 0 | 90 | 180 | 270 = 0,
   ) {}
 

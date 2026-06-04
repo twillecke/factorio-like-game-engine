@@ -1,25 +1,31 @@
 import { Container } from "pixi.js";
 import { engine } from "../core/Engine";
 import { world } from "../core/World";
+import type { AssetType } from "../core/assetTypes";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
+import { GridEntity } from "../entities/GridEntity";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
 import { SteamEngine } from "../entities/SteamEngine";
 import { Tank } from "../entities/Tank";
-import { GridEntity } from "../entities/GridEntity";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
-import { LargeGridEntityRenderer } from "./LargeUserObjectRenderer";
+import type { IEntityRenderer } from "./IEntityRenderer";
 import { PipeRenderer } from "./PipeRenderer";
 import { PreviewRenderer } from "./PreviewRenderer";
+import { PumpRenderer } from "./PumpRenderer";
 import { SteamEngineRenderer } from "./SteamEngineRenderer";
-import { GridEntityRenderer } from "./UserObjectRenderer";
+import { TankRenderer } from "./TankRenderer";
+
+const RENDERER_FACTORY: Record<AssetType, (e: GridEntity) => IEntityRenderer> = {
+  pipe: (e) => new PipeRenderer(e as Pipe),
+  pump: (e) => new PumpRenderer(e as Pump),
+  tank: (e) => new TankRenderer(e as Tank),
+  steamEngine: (e) => new SteamEngineRenderer(e as SteamEngine),
+};
 
 export class WorldRenderer {
   private chunkRenderers = new Map<string, ChunkRenderer>();
-  private gridEntityRenderers = new Map<string, { r: GridEntityRenderer; chunkId: string }>();
-  private pipeRenderers = new Map<string, { r: PipeRenderer; chunkId: string }>();
-  private largeEntityRenderers = new Map<string, { r: LargeGridEntityRenderer; chunkId: string }>();
-  private steamEngineRenderers = new Map<string, { r: SteamEngineRenderer; chunkId: string }>();
+  private entityRenderers = new Map<string, { r: IEntityRenderer; chunkId: string }>();
   public readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
@@ -49,24 +55,6 @@ export class WorldRenderer {
     this.chunkRenderers.delete(id);
   }
 
-  public addGridEntity(obj: GridEntity, chunkId: string): void {
-    this.removeGridEntity(obj.id);
-    const chunk = this.chunkRenderers.get(chunkId);
-    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
-    const r = new GridEntityRenderer(obj);
-    chunk.container.addChild(r.container);
-    this.gridEntityRenderers.set(obj.id, { r, chunkId });
-  }
-
-  public removeGridEntity(id: string): void {
-    const entry = this.gridEntityRenderers.get(id);
-    if (!entry) return;
-    const chunk = this.chunkRenderers.get(entry.chunkId);
-    chunk?.container.removeChild(entry.r.container);
-    entry.r.destroy();
-    this.gridEntityRenderers.delete(id);
-  }
-
   public screenToGrid(screenX: number, screenY: number, chunkId: string): { gridX: number; gridY: number } | null {
     const r = this.chunkRenderers.get(chunkId);
     if (!r) return null;
@@ -91,133 +79,36 @@ export class WorldRenderer {
     this.root.y += dy;
   }
 
-  public addPipe(pipe: Pipe, chunkId: string): void {
-    this.removePipe(pipe.id);
-    const chunk = this.chunkRenderers.get(chunkId);
-    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
-    const r = new PipeRenderer(pipe);
-    chunk.container.addChild(r.container);
-    this.pipeRenderers.set(pipe.id, { r, chunkId });
-  }
-
-  public removePipe(id: string): void {
-    const entry = this.pipeRenderers.get(id);
-    if (!entry) return;
-    const chunk = this.chunkRenderers.get(entry.chunkId);
-    chunk?.container.removeChild(entry.r.container);
-    entry.r.destroy();
-    this.pipeRenderers.delete(id);
-  }
-
-  public addLargeEntity(obj: GridEntity, chunkId: string): void {
-    this.removeLargeEntity(obj.id);
-    const chunk = this.chunkRenderers.get(chunkId);
-    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
-    const r = new LargeGridEntityRenderer(obj);
-    chunk.container.addChild(r.container);
-    this.largeEntityRenderers.set(obj.id, { r, chunkId });
-  }
-
-  public removeLargeEntity(id: string): void {
-    const entry = this.largeEntityRenderers.get(id);
-    if (!entry) return;
-    const chunk = this.chunkRenderers.get(entry.chunkId);
-    chunk?.container.removeChild(entry.r.container);
-    entry.r.destroy();
-    this.largeEntityRenderers.delete(id);
-  }
-
-  public addSteamEngine(obj: SteamEngine, chunkId: string): void {
-    this.removeSteamEngine(obj.id);
-    const chunk = this.chunkRenderers.get(chunkId);
-    if (!chunk) throw new Error(`Chunk "${chunkId}" not found`);
-    const r = new SteamEngineRenderer(obj);
-    chunk.container.addChild(r.container);
-    this.steamEngineRenderers.set(obj.id, { r, chunkId });
-  }
-
-  public removeSteamEngine(id: string): void {
-    const entry = this.steamEngineRenderers.get(id);
-    if (!entry) return;
-    const chunk = this.chunkRenderers.get(entry.chunkId);
-    chunk?.container.removeChild(entry.r.container);
-    entry.r.destroy();
-    this.steamEngineRenderers.delete(id);
-  }
-
   public render(): void {
-    this.syncGridEntities();
-    this.syncPipes();
-    this.syncLargeEntities();
-    this.syncSteamEngines();
-    for (const { r } of this.pipeRenderers.values()) r.sync();
-    for (const { r } of this.largeEntityRenderers.values()) r.sync();
-    for (const { r } of this.steamEngineRenderers.values()) r.sync();
+    this.syncEntities();
+    for (const { r } of this.entityRenderers.values()) r.sync?.();
     for (const r of this.chunkRenderers.values()) r.render();
   }
 
-  private syncGridEntities(): void {
-    const worldObjs = world.getAll(this.isGridEntity);
-    const worldIds = new Set(worldObjs.map((o) => o.id));
-
-    for (const id of [...this.gridEntityRenderers.keys()]) {
-      if (!worldIds.has(id)) this.removeGridEntity(id);
-    }
-    for (const obj of worldObjs) {
-      if (!this.gridEntityRenderers.has(obj.id)) this.addGridEntity(obj, obj.chunkId);
-    }
+  private syncEntities(): void {
+    const entities = world.getAll((e): e is GridEntity => e instanceof GridEntity);
+    const ids = new Set(entities.map((e) => e.id));
+    for (const id of [...this.entityRenderers.keys()])
+      if (!ids.has(id)) this.removeEntity(id);
+    for (const e of entities)
+      if (!this.entityRenderers.has(e.id)) this.addEntity(e);
   }
 
-  private syncPipes(): void {
-    const worldPipes = world.getAll(this.isPipe);
-    const worldIds = new Set(worldPipes.map((p) => p.id));
-
-    for (const id of [...this.pipeRenderers.keys()]) {
-      if (!worldIds.has(id)) this.removePipe(id);
-    }
-    for (const pipe of worldPipes) {
-      if (!this.pipeRenderers.has(pipe.id)) this.addPipe(pipe, pipe.chunkId);
-    }
+  private addEntity(obj: GridEntity): void {
+    const chunk = this.chunkRenderers.get(obj.chunkId);
+    if (!chunk) throw new Error(`Chunk "${obj.chunkId}" not found`);
+    const r = RENDERER_FACTORY[obj.assetType](obj);
+    chunk.container.addChild(r.container);
+    this.entityRenderers.set(obj.id, { r, chunkId: obj.chunkId });
   }
 
-  private syncLargeEntities(): void {
-    const worldObjs = world.getAll(this.isLargeEntity);
-    const worldIds = new Set(worldObjs.map((o) => o.id));
-
-    for (const id of [...this.largeEntityRenderers.keys()]) {
-      if (!worldIds.has(id)) this.removeLargeEntity(id);
-    }
-    for (const obj of worldObjs) {
-      if (!this.largeEntityRenderers.has(obj.id)) this.addLargeEntity(obj, obj.chunkId);
-    }
-  }
-
-  private syncSteamEngines(): void {
-    const worldObjs = world.getAll(this.isSteamEngine);
-    const worldIds = new Set(worldObjs.map((o) => o.id));
-
-    for (const id of [...this.steamEngineRenderers.keys()]) {
-      if (!worldIds.has(id)) this.removeSteamEngine(id);
-    }
-    for (const obj of worldObjs) {
-      if (!this.steamEngineRenderers.has(obj.id)) this.addSteamEngine(obj, obj.chunkId);
-    }
-  }
-
-  public isGridEntity(e: object): e is GridEntity {
-    return e instanceof GridEntity && !(e instanceof Pipe) && !(e instanceof Pump) && !(e instanceof Tank) && !(e instanceof SteamEngine);
-  }
-
-  public isPipe(e: object): e is Pipe {
-    return e instanceof Pipe;
-  }
-
-  public isLargeEntity(e: object): e is GridEntity {
-    return e instanceof Pump || e instanceof Tank;
-  }
-
-  public isSteamEngine(e: object): e is SteamEngine {
-    return e instanceof SteamEngine;
+  private removeEntity(id: string): void {
+    const entry = this.entityRenderers.get(id);
+    if (!entry) return;
+    const chunk = this.chunkRenderers.get(entry.chunkId);
+    chunk?.container.removeChild(entry.r.container);
+    entry.r.destroy();
+    this.entityRenderers.delete(id);
   }
 
   private layout(): void {
@@ -232,14 +123,8 @@ export class WorldRenderer {
 
   public destroy(): void {
     engine.renderer.off("resize", this.onResize);
-    for (const { r } of this.gridEntityRenderers.values()) r.destroy();
-    this.gridEntityRenderers.clear();
-    for (const { r } of this.pipeRenderers.values()) r.destroy();
-    this.pipeRenderers.clear();
-    for (const { r } of this.largeEntityRenderers.values()) r.destroy();
-    this.largeEntityRenderers.clear();
-    for (const { r } of this.steamEngineRenderers.values()) r.destroy();
-    this.steamEngineRenderers.clear();
+    for (const { r } of this.entityRenderers.values()) r.destroy();
+    this.entityRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();
     this.chunkRenderers.clear();
     this.preview.destroy();

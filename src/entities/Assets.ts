@@ -1,5 +1,5 @@
 import type { AssetType } from "../core/assetTypes";
-import type { Entity } from "../core/types";
+import { GridEntity } from "./GridEntity";
 import { Pipe } from "./Pipe";
 import { Pump } from "./Pump";
 import { SteamEngine } from "./SteamEngine";
@@ -10,7 +10,7 @@ export interface AssetDef {
   idPrefix: string;
   cellWidth: number;
   cellHeight: number;
-  create: (id: string, gridX: number, gridY: number, chunkId: string, rotation?: 0 | 90 | 180 | 270) => Entity;
+  create: (id: string, gridX: number, gridY: number, chunkId: string, rotation?: 0 | 90 | 180 | 270) => GridEntity;
 }
 
 export const ASSET_DEFS: Record<AssetType, AssetDef> = {

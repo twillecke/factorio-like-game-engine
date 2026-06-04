@@ -2,6 +2,7 @@ import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { GridEntity } from "../entities/GridEntity";
 import { Pipe } from "../entities/Pipe";
 import { TILE_SIZE } from "./ChunkRenderer";
+import type { IEntityRenderer } from "./IEntityRenderer";
 
 const PX = GridEntity.CELL_SIZE * TILE_SIZE;
 const COLOR_CONNECTED = 0x3498db;
@@ -14,7 +15,7 @@ const LABEL_STYLE = new TextStyle({
   dropShadow: { color: 0x000000, blur: 3, distance: 0, alpha: 0.5 },
 });
 
-export class PipeRenderer {
+export class PipeRenderer implements IEntityRenderer {
   public readonly container: Container;
   private graphics: Graphics;
   private lastConnected: boolean;

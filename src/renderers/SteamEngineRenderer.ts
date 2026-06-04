@@ -1,6 +1,7 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
 import { SteamEngine } from "../entities/SteamEngine";
 import { TILE_SIZE } from "./ChunkRenderer";
+import type { IEntityRenderer } from "./IEntityRenderer";
 
 const LABEL_STYLE = new TextStyle({
   fill: 0xffffff,
@@ -9,7 +10,7 @@ const LABEL_STYLE = new TextStyle({
   dropShadow: { color: 0x000000, blur: 4, distance: 0, alpha: 0.6 },
 });
 
-export class SteamEngineRenderer {
+export class SteamEngineRenderer implements IEntityRenderer {
   public readonly container: Container;
   private graphics: Graphics;
   private lastRunning: boolean | null = null;
