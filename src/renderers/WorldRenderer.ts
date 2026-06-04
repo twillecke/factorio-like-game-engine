@@ -20,6 +20,8 @@ export class WorldRenderer {
   public readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
+  private static readonly MIN_ZOOM = 0.25;
+  private static readonly MAX_ZOOM = 4;
 
   constructor() {
     this.root = new Container();
@@ -71,9 +73,6 @@ export class WorldRenderer {
     if (gridX < 0 || gridX >= CHUNK_SIZE || gridY < 0 || gridY >= CHUNK_SIZE) return null;
     return { gridX, gridY };
   }
-
-  private static readonly MIN_ZOOM = 0.25;
-  private static readonly MAX_ZOOM = 4;
 
   public zoomAtPoint(screenX: number, screenY: number, factor: number): void {
     const oldScale = this.root.scale.x;
