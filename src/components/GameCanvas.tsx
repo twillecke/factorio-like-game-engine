@@ -34,8 +34,13 @@ export function GameCanvas() {
 			worldRenderer.addMarker(end, chunk.id);
 
 			const placementSystem = new PlacementSystem(chunk.id);
-			const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id,
-				(x, y) => placementSystem.toggleAt(x, y),
+			canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+			const inputSystem = new InputSystem(
+				canvas,
+				worldRenderer,
+				chunk.id,
+				(x, y) => placementSystem.placeAt(x, y),
+				(x, y) => placementSystem.removeAt(x, y),
 			);
 			world.addSystem(new ChunkSystem());
 			world.addSystem(placementSystem);

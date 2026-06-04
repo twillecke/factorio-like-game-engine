@@ -10,16 +10,29 @@ function isMarker(e: Entity): e is Marker {
 export class PlacementSystem implements System {
   constructor(private chunkId: string) {}
 
-  toggleAt(gridX: number, gridY: number): void {
-    const blockedByMarker = world.getAll(isMarker).some(
+  private isBlocked(gridX: number, gridY: number): boolean {
+    return world.getAll(isMarker).some(
       (m) =>
         gridX >= m.gridX &&
         gridX < m.gridX + Marker.CELL_SIZE &&
         gridY >= m.gridY &&
         gridY < m.gridY + Marker.CELL_SIZE,
     );
-    if (blockedByMarker) return;
+  }
 
+  placeAt(gridX: number, gridY: number): void {
+    if (this.isBlocked(gridX, gridY)) return;
+    const id = `user-${gridX}-${gridY}`;
+    if (world.get(id)) return;
+    world.register(new Pipe(id, gridX, gridY, this.chunkId));
+  }
+
+  removeAt(gridX: number, gridY: number): void {
+    world.unregister(`user-${gridX}-${gridY}`);
+  }
+
+  toggleAt(gridX: number, gridY: number): void {
+    if (this.isBlocked(gridX, gridY)) return;
     const id = `user-${gridX}-${gridY}`;
     if (world.get(id)) {
       world.unregister(id);
