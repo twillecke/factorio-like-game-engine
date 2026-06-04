@@ -3,6 +3,7 @@ import type { Entity, System } from "./types";
 class World {
   private entities = new Map<string, Entity>();
   private systems: System[] = [];
+  private spatial = new Map<string, Entity>();
 
   register(entity: Entity): void {
     this.entities.set(entity.id, entity);
@@ -30,8 +31,21 @@ class World {
     for (const system of this.systems) system.update(dt);
   }
 
+  setSpatial(x: number, y: number, entity: Entity): void {
+    this.spatial.set(`${x},${y}`, entity);
+  }
+
+  clearSpatial(x: number, y: number): void {
+    this.spatial.delete(`${x},${y}`);
+  }
+
+  getSpatial<T extends Entity>(x: number, y: number): T | undefined {
+    return this.spatial.get(`${x},${y}`) as T | undefined;
+  }
+
   reset(): void {
     this.entities.clear();
+    this.spatial.clear();
     this.systems = [];
   }
 

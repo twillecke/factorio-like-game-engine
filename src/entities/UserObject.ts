@@ -9,4 +9,8 @@ export class UserObject implements Entity {
     readonly gridY: number,
     readonly chunkId: string,
   ) {}
+
+  get cellSize(): number {
+    return (this.constructor as typeof UserObject).CELL_SIZE;
+  }
 }

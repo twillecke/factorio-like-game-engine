@@ -2,6 +2,7 @@ import type { System } from "../core/types";
 import type { ToolType } from "../core/toolTypes";
 import { world } from "../core/World";
 import { TOOL_DEFS } from "../entities/tools";
+import { UserObject } from "../entities/UserObject";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
 export class PlacementSystem implements System {
@@ -32,27 +33,20 @@ export class PlacementSystem implements System {
         if (this.isOccupied(gridX + dx, gridY + dy)) return;
 
     const id = `${def.idPrefix}-${gridX}-${gridY}`;
-    if (world.get(id)) return;
-    world.register(def.create(id, gridX, gridY, this.chunkId));
+    const entity = def.create(id, gridX, gridY, this.chunkId);
+    world.register(entity);
+    for (let dx = 0; dx < def.cellSize; dx++)
+      for (let dy = 0; dy < def.cellSize; dy++)
+        world.setSpatial(gridX + dx, gridY + dy, entity);
   }
 
   removeAt(gridX: number, gridY: number): void {
-    for (const [, def] of Object.entries(TOOL_DEFS)) {
-      const id = `${def.idPrefix}-${gridX}-${gridY}`;
-      if (world.get(id)) { world.unregister(id); return; }
-    }
-
-    for (let dx = 0; dx < 2; dx++) {
-      for (let dy = 0; dy < 2; dy++) {
-        const ox = gridX - dx;
-        const oy = gridY - dy;
-        for (const [, def] of Object.entries(TOOL_DEFS)) {
-          if (def.cellSize < 2) continue;
-          const id = `${def.idPrefix}-${ox}-${oy}`;
-          if (world.get(id)) { world.unregister(id); return; }
-        }
-      }
-    }
+    const entity = world.getSpatial<UserObject>(gridX, gridY);
+    if (!entity) return;
+    for (let dx = 0; dx < entity.cellSize; dx++)
+      for (let dy = 0; dy < entity.cellSize; dy++)
+        world.clearSpatial(entity.gridX + dx, entity.gridY + dy);
+    world.unregister(entity.id);
   }
 
   update(_dt: number): void {}
@@ -66,22 +60,7 @@ export class PlacementSystem implements System {
     return true;
   }
 
-  private isOccupied(gridX: number, gridY: number): boolean {
-    for (const [, def] of Object.entries(TOOL_DEFS)) {
-      if (world.get(`${def.idPrefix}-${gridX}-${gridY}`)) return true;
-    }
-
-    for (let dx = 0; dx < 2; dx++) {
-      for (let dy = 0; dy < 2; dy++) {
-        const ox = gridX - dx;
-        const oy = gridY - dy;
-        for (const [, def] of Object.entries(TOOL_DEFS)) {
-          if (def.cellSize < 2) continue;
-          if (world.get(`${def.idPrefix}-${ox}-${oy}`)) return true;
-        }
-      }
-    }
-
-    return false;
+  private isOccupied(x: number, y: number): boolean {
+    return world.getSpatial(x, y) !== undefined;
   }
 }
