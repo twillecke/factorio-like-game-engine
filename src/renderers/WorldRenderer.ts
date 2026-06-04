@@ -1,8 +1,9 @@
 import { Container } from "pixi.js";
 import { engine } from "../core/Engine";
+import { world } from "../core/World";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { type Marker } from "../entities/Marker";
-import { type UserObject } from "../entities/UserObject";
+import { UserObject } from "../entities/UserObject";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import { MarkerRenderer } from "./MarkerRenderer";
 import { UserObjectRenderer } from "./UserObjectRenderer";
@@ -83,10 +84,27 @@ export class WorldRenderer {
   }
 
   render(): void {
+    this.syncUserObjects();
     for (const r of this.chunkRenderers.values()) {
       r.render();
     }
   }
+
+  private syncUserObjects(): void {
+    const worldObjs = world.getAll(this.isUserObject);
+    const worldIds = new Set(worldObjs.map((o) => o.id));
+
+    for (const id of [...this.userObjectRenderers.keys()]) {
+      if (!worldIds.has(id)) this.removeUserObject(id);
+    }
+    for (const obj of worldObjs) {
+      if (!this.userObjectRenderers.has(obj.id)) this.addUserObject(obj, obj.chunkId);
+    }
+  }
+
+ isUserObject(e: object): e is UserObject {
+  return e instanceof UserObject;
+}
 
   private layout(): void {
     const { width, height } = engine.screen;

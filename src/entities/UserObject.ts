@@ -8,5 +8,6 @@ export class UserObject implements Entity {
     readonly id: string,
     readonly gridX: number,
     readonly gridY: number,
+    readonly chunkId: string,
   ) {}
 }

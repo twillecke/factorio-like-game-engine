@@ -2,19 +2,13 @@ import type { Entity, System } from "../core/types";
 import { world } from "../core/World";
 import { Marker } from "../entities/Marker";
 import { UserObject } from "../entities/UserObject";
-import type { WorldRenderer } from "../renderers/WorldRenderer";
 
 function isMarker(e: Entity): e is Marker {
   return e instanceof Marker;
 }
 
 export class PlacementSystem implements System {
-  private placedIds = new Set<string>();
-
-  constructor(
-    private worldRenderer: WorldRenderer,
-    private chunkId: string,
-  ) {}
+  constructor(private chunkId: string) {}
 
   toggleAt(gridX: number, gridY: number): void {
     const blockedByMarker = world.getAll(isMarker).some(
@@ -27,21 +21,12 @@ export class PlacementSystem implements System {
     if (blockedByMarker) return;
 
     const id = `user-${gridX}-${gridY}`;
-    if (this.placedIds.has(id)) {
+    if (world.get(id)) {
       world.unregister(id);
-      this.worldRenderer.removeUserObject(id);
-      this.placedIds.delete(id);
       return;
     }
-    const obj = new UserObject(id, gridX, gridY);
-    world.register(obj);
-    this.worldRenderer.addUserObject(obj, this.chunkId);
-    this.placedIds.add(id);
+    world.register(new UserObject(id, gridX, gridY, this.chunkId));
   }
 
   update(_dt: number): void {}
-
-  destroy(): void {
-    this.placedIds.clear();
-  }
 }

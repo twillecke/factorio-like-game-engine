@@ -32,7 +32,7 @@ export function GameCanvas() {
 			worldRenderer.addMarker(start, chunk.id);
 			worldRenderer.addMarker(end, chunk.id);
 
-			const placementSystem = new PlacementSystem(worldRenderer, chunk.id);
+			const placementSystem = new PlacementSystem(chunk.id);
 			const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id,
 				(x, y) => placementSystem.toggleAt(x, y),
 			);
@@ -47,7 +47,6 @@ export function GameCanvas() {
 
 			extraCleanup = () => {
 				inputSystem.destroy();
-				placementSystem.destroy();
 				worldRenderer.destroy();
 			};
 		});
