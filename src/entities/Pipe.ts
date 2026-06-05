@@ -1,6 +1,6 @@
-import { GridEntity } from "./GridEntity";
+import { Asset } from "./Asset";
 
-export class Pipe extends GridEntity {
+export class Pipe extends Asset {
   public isConnected = false;
 
   constructor(id: string, gridX: number, gridY: number, chunkId: string, rotation: 0 | 90 | 180 | 270 = 0) {

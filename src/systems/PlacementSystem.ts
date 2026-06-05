@@ -3,7 +3,7 @@ import type { AssetType } from "../entities/assetTypes";
 import { world } from "../core/World";
 import { ASSET_DEFS } from "../entities/registry";
 import { CHUNK_SIZE } from "../entities/Chunk";
-import { GridEntity } from "../entities/GridEntity";
+import { Asset } from "../entities/Asset";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
 export class PlacementSystem implements System {
@@ -50,7 +50,7 @@ export class PlacementSystem implements System {
   }
 
   public removeAt(gridX: number, gridY: number): void {
-    const entity = world.getSpatial<GridEntity>(gridX, gridY);
+    const entity = world.getSpatial<Asset>(gridX, gridY);
     if (!entity) return;
     for (let dx = 0; dx < entity.effectiveCellWidth; dx++)
       for (let dy = 0; dy < entity.effectiveCellHeight; dy++)

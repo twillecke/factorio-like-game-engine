@@ -1,7 +1,7 @@
 import type { AssetType } from "./assetTypes";
 import type { Entity } from "../core/types";
 
-export class GridEntity implements Entity {
+export class Asset implements Entity {
   public static readonly CELL_SIZE: number = 1;
   public static readonly CELL_WIDTH?: number;
   public static readonly CELL_HEIGHT?: number;
@@ -16,15 +16,15 @@ export class GridEntity implements Entity {
   ) {}
 
   public get cellSize(): number {
-    return (this.constructor as typeof GridEntity).CELL_SIZE;
+    return (this.constructor as typeof Asset).CELL_SIZE;
   }
 
   public get cellWidth(): number {
-    return (this.constructor as typeof GridEntity).CELL_WIDTH ?? this.cellSize;
+    return (this.constructor as typeof Asset).CELL_WIDTH ?? this.cellSize;
   }
 
   public get cellHeight(): number {
-    return (this.constructor as typeof GridEntity).CELL_HEIGHT ?? this.cellSize;
+    return (this.constructor as typeof Asset).CELL_HEIGHT ?? this.cellSize;
   }
 
   public get effectiveCellWidth(): number {

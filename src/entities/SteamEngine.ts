@@ -1,10 +1,10 @@
 import type { BeltItem } from "./BeltItem";
-import { GridEntity } from "./GridEntity";
+import { Asset } from "./Asset";
 import type { IItemReceiver } from "./IItemReceiver";
 
 const COAL_BURN_DURATION = 5; // seconds per coal
 
-export class SteamEngine extends GridEntity implements IItemReceiver {
+export class SteamEngine extends Asset implements IItemReceiver {
   public static readonly CELL_WIDTH = 2;
   public static readonly CELL_HEIGHT = 6;
   public isRunning = false;

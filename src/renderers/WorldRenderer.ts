@@ -5,7 +5,7 @@ import type { AssetType } from "../entities/assetTypes";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { Belt } from "../entities/Belt";
 import { BeltItem } from "../entities/BeltItem";
-import { GridEntity } from "../entities/GridEntity";
+import { Asset } from "../entities/Asset";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
 import { SteamEngine } from "../entities/SteamEngine";
@@ -20,7 +20,7 @@ import { PumpRenderer } from "./PumpRenderer";
 import { SteamEngineRenderer } from "./SteamEngineRenderer";
 import { TankRenderer } from "./TankRenderer";
 
-const RENDERER_FACTORY: Record<AssetType, (e: GridEntity) => IEntityRenderer> = {
+const ASSET_RENDERER_FACTORY: Record<AssetType, (e: Asset) => IEntityRenderer> = {
   pipe: (e) => new PipeRenderer(e as Pipe),
   pump: (e) => new PumpRenderer(e as Pump),
   tank: (e) => new TankRenderer(e as Tank),
@@ -30,7 +30,7 @@ const RENDERER_FACTORY: Record<AssetType, (e: GridEntity) => IEntityRenderer> = 
 
 export class WorldRenderer {
   private chunkRenderers = new Map<string, ChunkRenderer>();
-  private entityRenderers = new Map<string, { r: IEntityRenderer; chunkId: string }>();
+  private assetRenderers = new Map<string, { r: IEntityRenderer; chunkId: string }>();
   private itemRenderers = new Map<string, ItemRenderer>();
   private itemsLayer = new Container();
   public readonly preview = new PreviewRenderer();
@@ -88,20 +88,20 @@ export class WorldRenderer {
   }
 
   public render(): void {
-    this.syncEntities();
+    this.syncAssets();
     this.syncItems();
-    for (const { r } of this.entityRenderers.values()) r.sync?.();
+    for (const { r } of this.assetRenderers.values()) r.sync?.();
     for (const r of this.itemRenderers.values()) r.sync?.();
     for (const r of this.chunkRenderers.values()) r.render();
   }
 
-  private syncEntities(): void {
-    const entities = world.getAll((e): e is GridEntity => e instanceof GridEntity);
-    const ids = new Set(entities.map((e) => e.id));
-    for (const id of [...this.entityRenderers.keys()])
-      if (!ids.has(id)) this.removeEntity(id);
-    for (const e of entities)
-      if (!this.entityRenderers.has(e.id)) this.addEntity(e);
+  private syncAssets(): void {
+    const assets = world.getAll((e): e is Asset => e instanceof Asset);
+    const ids = new Set(assets.map((e) => e.id));
+    for (const id of [...this.assetRenderers.keys()])
+      if (!ids.has(id)) this.removeAsset(id);
+    for (const e of assets)
+      if (!this.assetRenderers.has(e.id)) this.addAsset(e);
   }
 
   private syncItems(): void {
@@ -117,21 +117,21 @@ export class WorldRenderer {
       }
   }
 
-  private addEntity(obj: GridEntity): void {
+  private addAsset(obj: Asset): void {
     const chunk = this.chunkRenderers.get(obj.chunkId);
     if (!chunk) throw new Error(`Chunk "${obj.chunkId}" not found`);
-    const r = RENDERER_FACTORY[obj.assetType](obj);
+    const r = ASSET_RENDERER_FACTORY[obj.assetType](obj);
     chunk.container.addChild(r.container);
-    this.entityRenderers.set(obj.id, { r, chunkId: obj.chunkId });
+    this.assetRenderers.set(obj.id, { r, chunkId: obj.chunkId });
   }
 
-  private removeEntity(id: string): void {
-    const entry = this.entityRenderers.get(id);
+  private removeAsset(id: string): void {
+    const entry = this.assetRenderers.get(id);
     if (!entry) return;
     const chunk = this.chunkRenderers.get(entry.chunkId);
     chunk?.container.removeChild(entry.r.container);
     entry.r.destroy();
-    this.entityRenderers.delete(id);
+    this.assetRenderers.delete(id);
   }
 
   private layout(): void {
@@ -146,8 +146,8 @@ export class WorldRenderer {
 
   public destroy(): void {
     engine.renderer.off("resize", this.onResize);
-    for (const { r } of this.entityRenderers.values()) r.destroy();
-    this.entityRenderers.clear();
+    for (const { r } of this.assetRenderers.values()) r.destroy();
+    this.assetRenderers.clear();
     for (const r of this.itemRenderers.values()) r.destroy();
     this.itemRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();

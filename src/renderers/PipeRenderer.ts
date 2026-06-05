@@ -1,10 +1,10 @@
 import { Container, Graphics, Text, TextStyle } from "pixi.js";
-import { GridEntity } from "../entities/GridEntity";
+import { Asset } from "../entities/Asset";
 import { Pipe } from "../entities/Pipe";
 import { TILE_SIZE } from "./ChunkRenderer";
 import type { IEntityRenderer } from "./IEntityRenderer";
 
-const PX = GridEntity.CELL_SIZE * TILE_SIZE;
+const PX = Asset.CELL_SIZE * TILE_SIZE;
 const COLOR_CONNECTED = 0x3498db;
 const COLOR_DISCONNECTED = 0xf1c40f;
 

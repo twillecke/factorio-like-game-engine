@@ -1,6 +1,6 @@
-import { GridEntity } from "./GridEntity";
+import { Asset } from "./Asset";
 
-export class Tank extends GridEntity {
+export class Tank extends Asset {
   public static readonly CELL_SIZE = 2;
   public isFilled = false;
 
