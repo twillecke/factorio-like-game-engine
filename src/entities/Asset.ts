@@ -1,7 +1,7 @@
 import type { AssetType } from "./assetTypes";
-import type { Entity } from "../core/types";
+import type { SpatialEntity } from "../core/types";
 
-export class Asset implements Entity {
+export class Asset implements SpatialEntity {
   public static readonly CELL_SIZE: number = 1;
   public static readonly CELL_WIDTH?: number;
   public static readonly CELL_HEIGHT?: number;

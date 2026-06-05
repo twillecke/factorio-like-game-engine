@@ -1,16 +1,30 @@
-import type { Entity, System } from "./types";
+import type { Entity, SpatialEntity, System } from "./types";
 
 class World {
   private entities = new Map<string, Entity>();
   private systems: System[] = [];
-  private spatial = new Map<string, Entity>();
+  private spatial = new Map<string, SpatialEntity>();
 
   public register(entity: Entity): void {
     this.entities.set(entity.id, entity);
   }
 
+  public registerSpatial(entity: SpatialEntity): void {
+    this.entities.set(entity.id, entity);
+    for (let dx = 0; dx < entity.effectiveCellWidth; dx++)
+      for (let dy = 0; dy < entity.effectiveCellHeight; dy++)
+        this.spatial.set(`${entity.gridX + dx},${entity.gridY + dy}`, entity);
+  }
+
   public unregister(id: string): void {
     this.entities.delete(id);
+  }
+
+  public unregisterSpatial(entity: SpatialEntity): void {
+    for (let dx = 0; dx < entity.effectiveCellWidth; dx++)
+      for (let dy = 0; dy < entity.effectiveCellHeight; dy++)
+        this.spatial.delete(`${entity.gridX + dx},${entity.gridY + dy}`);
+    this.entities.delete(entity.id);
   }
 
   public get<T extends Entity>(id: string): T | undefined {
@@ -29,14 +43,6 @@ class World {
 
   public update(dt: number): void {
     for (const system of this.systems) system.update(dt);
-  }
-
-  public setSpatial(x: number, y: number, entity: Entity): void {
-    this.spatial.set(`${x},${y}`, entity);
-  }
-
-  public clearSpatial(x: number, y: number): void {
-    this.spatial.delete(`${x},${y}`);
   }
 
   public getSpatial<T extends Entity>(x: number, y: number): T | undefined {

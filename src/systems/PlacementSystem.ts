@@ -43,19 +43,13 @@ export class PlacementSystem implements System {
     const def = ASSET_DEFS[this.tool];
     const id = `${def.idPrefix}-${gridX}-${gridY}`;
     const entity = def.create(id, gridX, gridY, this.chunkId, this.rotation);
-    world.register(entity);
-    for (let dx = 0; dx < entity.effectiveCellWidth; dx++)
-      for (let dy = 0; dy < entity.effectiveCellHeight; dy++)
-        world.setSpatial(gridX + dx, gridY + dy, entity);
+    world.registerSpatial(entity);
   }
 
   public removeAt(gridX: number, gridY: number): void {
     const entity = world.getSpatial<Asset>(gridX, gridY);
     if (!entity) return;
-    for (let dx = 0; dx < entity.effectiveCellWidth; dx++)
-      for (let dy = 0; dy < entity.effectiveCellHeight; dy++)
-        world.clearSpatial(entity.gridX + dx, entity.gridY + dy);
-    world.unregister(entity.id);
+    world.unregisterSpatial(entity);
   }
 
   public update(_dt: number): void {}
