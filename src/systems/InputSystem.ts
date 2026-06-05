@@ -10,6 +10,7 @@ export class InputSystem implements System {
   private readonly onKeyDown: (e: KeyboardEvent) => void;
   private isDown = false;
   private lastCell: { gridX: number; gridY: number } | null = null;
+  private hoverCell: { gridX: number; gridY: number } | null = null;
   private isPanning = false;
   private panLastX = 0;
   private panLastY = 0;
@@ -23,6 +24,7 @@ export class InputSystem implements System {
     onCellHover?: (gridX: number, gridY: number) => void,
     onHoverLeave?: () => void,
     onRotate?: () => void,
+    onInsertItem?: (gridX: number, gridY: number) => void,
   ) {
     this.onWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -59,8 +61,8 @@ export class InputSystem implements System {
         return;
       }
       const coord = worldRenderer.screenToGrid(e.clientX, e.clientY, chunkId);
-      if (coord) onCellHover?.(coord.gridX, coord.gridY);
-      else onHoverLeave?.();
+      if (coord) { this.hoverCell = coord; onCellHover?.(coord.gridX, coord.gridY); }
+      else { this.hoverCell = null; onHoverLeave?.(); }
 
       if (!this.isDown) return;
       if (!coord) return;
@@ -86,6 +88,7 @@ export class InputSystem implements System {
 
     this.onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "r" || e.key === "R") onRotate?.();
+      if (e.code === "KeyI" && this.hoverCell) onInsertItem?.(this.hoverCell.gridX, this.hoverCell.gridY);
     };
 
     canvas.addEventListener("pointerdown", this.onPointerDown);

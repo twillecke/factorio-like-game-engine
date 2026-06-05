@@ -4,6 +4,9 @@ import type { AssetType } from "../entities/assetTypes";
 import { world } from "../core/World";
 import { Chunk } from "../entities/Chunk";
 import { WorldRenderer } from "../renderers/WorldRenderer";
+import { Belt } from "../entities/Belt";
+import { BeltItem } from "../entities/BeltItem";
+import { BeltSystem } from "../systems/BeltSystem";
 import { ChunkSystem } from "../systems/ChunkSystem";
 import { InputSystem } from "../systems/InputSystem";
 import { PipeSystem } from "../systems/PipeSystem";
@@ -44,10 +47,15 @@ export function GameCanvas({ tool }: GameCanvasProps) {
         (x, y) => placementSystem.hoverAt(x, y),
         () => placementSystem.clearHover(),
         () => placementSystem.rotate(),
+        (x, y) => {
+          const belt = world.getSpatial<Belt>(x, y);
+          if (belt instanceof Belt) world.registerItem(BeltItem.create("coal", belt.id));
+        },
       );
       world.addSystem(new ChunkSystem());
       world.addSystem(placementSystem);
       world.addSystem(new PipeSystem());
+      world.addSystem(new BeltSystem());
       world.addSystem(inputSystem);
 
       engine.ticker.add((ticker) => {

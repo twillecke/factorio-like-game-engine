@@ -12,6 +12,7 @@ import { Tank } from "../entities/Tank";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import type { IEntityRenderer } from "./IEntityRenderer";
 import { BeltRenderer } from "./BeltRenderer";
+import { ItemRenderer } from "./ItemRenderer";
 import { PipeRenderer } from "./PipeRenderer";
 import { PreviewRenderer } from "./PreviewRenderer";
 import { PumpRenderer } from "./PumpRenderer";
@@ -29,6 +30,8 @@ const RENDERER_FACTORY: Record<AssetType, (e: GridEntity) => IEntityRenderer> = 
 export class WorldRenderer {
   private chunkRenderers = new Map<string, ChunkRenderer>();
   private entityRenderers = new Map<string, { r: IEntityRenderer; chunkId: string }>();
+  private itemRenderers = new Map<string, ItemRenderer>();
+  private itemsLayer = new Container();
   public readonly preview = new PreviewRenderer();
   private root: Container;
   private readonly onResize: () => void;
@@ -46,6 +49,7 @@ export class WorldRenderer {
     const r = new ChunkRenderer(chunk);
     this.chunkRenderers.set(chunk.id, r);
     this.root.addChild(r.container);
+    this.root.addChild(this.itemsLayer); // keep items layer on top of all chunks
     this.preview.attach(r.container);
     this.layout();
   }
@@ -84,7 +88,9 @@ export class WorldRenderer {
 
   public render(): void {
     this.syncEntities();
+    this.syncItems();
     for (const { r } of this.entityRenderers.values()) r.sync?.();
+    for (const r of this.itemRenderers.values()) r.sync?.();
     for (const r of this.chunkRenderers.values()) r.render();
   }
 
@@ -95,6 +101,19 @@ export class WorldRenderer {
       if (!ids.has(id)) this.removeEntity(id);
     for (const e of entities)
       if (!this.entityRenderers.has(e.id)) this.addEntity(e);
+  }
+
+  private syncItems(): void {
+    const items = world.getAllItems();
+    const ids = new Set(items.map((i) => i.id));
+    for (const id of [...this.itemRenderers.keys()])
+      if (!ids.has(id)) { this.itemRenderers.get(id)!.destroy(); this.itemRenderers.delete(id); }
+    for (const item of items)
+      if (!this.itemRenderers.has(item.id)) {
+        const r = new ItemRenderer(item);
+        this.itemsLayer.addChild(r.container);
+        this.itemRenderers.set(item.id, r);
+      }
   }
 
   private addEntity(obj: GridEntity): void {
@@ -128,6 +147,8 @@ export class WorldRenderer {
     engine.renderer.off("resize", this.onResize);
     for (const { r } of this.entityRenderers.values()) r.destroy();
     this.entityRenderers.clear();
+    for (const r of this.itemRenderers.values()) r.destroy();
+    this.itemRenderers.clear();
     for (const r of this.chunkRenderers.values()) r.destroy();
     this.chunkRenderers.clear();
     this.preview.destroy();

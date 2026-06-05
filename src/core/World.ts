@@ -1,9 +1,11 @@
+import type { BeltItem } from "../entities/BeltItem";
 import type { Entity, System } from "./types";
 
 class World {
   private entities = new Map<string, Entity>();
   private systems: System[] = [];
   private spatial = new Map<string, Entity>();
+  private items = new Map<string, BeltItem>();
 
   public register(entity: Entity): void {
     this.entities.set(entity.id, entity);
@@ -43,9 +45,22 @@ class World {
     return this.spatial.get(`${x},${y}`) as T | undefined;
   }
 
+  public registerItem(item: BeltItem): void {
+    this.items.set(item.id, item);
+  }
+
+  public unregisterItem(id: string): void {
+    this.items.delete(id);
+  }
+
+  public getAllItems(): BeltItem[] {
+    return [...this.items.values()];
+  }
+
   public reset(): void {
     this.entities.clear();
     this.spatial.clear();
+    this.items.clear();
     this.systems = [];
   }
 
