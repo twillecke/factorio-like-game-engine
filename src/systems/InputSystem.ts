@@ -35,7 +35,7 @@ export class InputSystem implements System {
     this.onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
-      worldRenderer.zoomAtPoint(e.clientX, e.clientY, factor);
+      worldRenderer.camera.zoomAtPoint(e.clientX, e.clientY, factor);
     };
 
     this.onPointerDown = (e: PointerEvent) => {
@@ -61,7 +61,7 @@ export class InputSystem implements System {
 
     this.onPointerMove = (e: PointerEvent) => {
       if (this.isPanning) {
-        worldRenderer.pan(e.clientX - this.panLastX, e.clientY - this.panLastY);
+        worldRenderer.camera.pan(e.clientX - this.panLastX, e.clientY - this.panLastY);
         this.panLastX = e.clientX;
         this.panLastY = e.clientY;
         return;
