@@ -91,8 +91,7 @@ export class PipeSystem implements System {
     }
     for (const engine of engines) {
       if (engine.fuelTime > 0) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
-      engine.isRunning = engine.fuelTime > 0 &&
-        this.isAdjacentToAnyCell(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT, activeCells);
+      engine.hasWater = this.isAdjacentToAnyCell(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT, activeCells);
     }
   }
 

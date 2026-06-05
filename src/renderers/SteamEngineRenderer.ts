@@ -10,9 +10,16 @@ const LABEL_STYLE = new TextStyle({
   dropShadow: { color: 0x000000, blur: 4, distance: 0, alpha: 0.6 },
 });
 
+const STATUS_STYLE = new TextStyle({
+  fill: 0xdddddd,
+  fontSize: 11,
+  dropShadow: { color: 0x000000, blur: 3, distance: 0, alpha: 0.8 },
+});
+
 export class SteamEngineRenderer implements IEntityRenderer {
   public readonly container: Container;
   private graphics: Graphics;
+  private statusText: Text;
   private lastRunning: boolean | null = null;
 
   constructor(private readonly engine: SteamEngine) {
@@ -23,17 +30,17 @@ export class SteamEngineRenderer implements IEntityRenderer {
     this.container.y = engine.gridY * TILE_SIZE;
     this.draw();
     this.addLabel();
+    this.statusText = this.addStatusText();
   }
 
   public sync(): void {
-    if (!this.engine.isRunning) {
-      if (this.lastRunning === false) return;
-      this.lastRunning = false;
-    } else {
-      this.lastRunning = true;
+    const running = this.engine.isRunning;
+    if (running !== this.lastRunning) {
+      this.lastRunning = running;
+      this.graphics.clear();
+      this.draw();
     }
-    this.graphics.clear();
-    this.draw();
+    this.updateStatus();
   }
 
   private static hslToHex(h: number, s: number, l: number): number {
@@ -68,8 +75,25 @@ export class SteamEngineRenderer implements IEntityRenderer {
     const text = new Text({ text: "SE", style: LABEL_STYLE });
     text.anchor.set(0.5);
     text.x = w / 2;
-    text.y = h / 2;
+    text.y = h / 2 - 12;
     this.container.addChild(text);
+  }
+
+  private addStatusText(): Text {
+    const w = this.engine.effectiveCellWidth * TILE_SIZE;
+    const h = this.engine.effectiveCellHeight * TILE_SIZE;
+    const text = new Text({ text: "", style: STATUS_STYLE });
+    text.anchor.set(0.5);
+    text.x = w / 2;
+    text.y = h / 2 + 10;
+    this.container.addChild(text);
+    return text;
+  }
+
+  private updateStatus(): void {
+    const fuel = this.engine.fuelCoal.toFixed(1);
+    const water = this.engine.hasWater ? "W: yes" : "W: no";
+    this.statusText.text = `${water}\nF: ${fuel}`;
   }
 
   public destroy(): void {
