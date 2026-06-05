@@ -1,4 +1,5 @@
 import type { AssetType } from "./assetTypes";
+import { Belt } from "./Belt";
 import { GridEntity } from "./GridEntity";
 import { Pipe } from "./Pipe";
 import { Pump } from "./Pump";
@@ -41,6 +42,13 @@ export const ASSET_DEFS: Record<AssetType, AssetDef> = {
     cellWidth: SteamEngine.CELL_WIDTH,
     cellHeight: SteamEngine.CELL_HEIGHT,
     create: (id, x, y, chunk, rotation = 0) => new SteamEngine(id, x, y, chunk, rotation),
+  },
+  belt: {
+    label: "Belt",
+    idPrefix: "belt",
+    cellWidth: Belt.CELL_SIZE,
+    cellHeight: Belt.CELL_SIZE,
+    create: (id, x, y, chunk, rotation = 0) => new Belt(id, x, y, chunk, rotation),
   },
 };
 

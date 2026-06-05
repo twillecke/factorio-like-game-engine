@@ -8,6 +8,7 @@ const ASSET_COLOR: Record<AssetType, number> = {
   pump: 0x27ae60,
   tank: 0xe67e22,
   steamEngine: 0x2980b9,
+  belt: 0x7B5730,
 };
 
 const INVALID_COLOR = 0xff4444;

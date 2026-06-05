@@ -3,6 +3,7 @@ import { engine } from "../core/Engine";
 import { world } from "../core/World";
 import type { AssetType } from "../entities/assetTypes";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
+import { Belt } from "../entities/Belt";
 import { GridEntity } from "../entities/GridEntity";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
@@ -10,6 +11,7 @@ import { SteamEngine } from "../entities/SteamEngine";
 import { Tank } from "../entities/Tank";
 import { CHUNK_PX, ChunkRenderer, TILE_SIZE } from "./ChunkRenderer";
 import type { IEntityRenderer } from "./IEntityRenderer";
+import { BeltRenderer } from "./BeltRenderer";
 import { PipeRenderer } from "./PipeRenderer";
 import { PreviewRenderer } from "./PreviewRenderer";
 import { PumpRenderer } from "./PumpRenderer";
@@ -21,6 +23,7 @@ const RENDERER_FACTORY: Record<AssetType, (e: GridEntity) => IEntityRenderer> = 
   pump: (e) => new PumpRenderer(e as Pump),
   tank: (e) => new TankRenderer(e as Tank),
   steamEngine: (e) => new SteamEngineRenderer(e as SteamEngine),
+  belt: (e) => new BeltRenderer(e as Belt),
 };
 
 export class WorldRenderer {
