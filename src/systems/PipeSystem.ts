@@ -90,8 +90,8 @@ export class PipeSystem implements System {
         activeCells.add(cellKey(cell.x, cell.y));
     }
     for (const engine of engines) {
-      if (engine.fuelTime > 0) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
       engine.hasWater = this.isAdjacentToAnyCell(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT, activeCells);
+      if (engine.isRunning) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
     }
   }
 
