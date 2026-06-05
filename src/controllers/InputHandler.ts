@@ -1,7 +1,6 @@
-import type { System } from "../core/types";
 import type { WorldRenderer } from "../renderers/WorldRenderer";
 
-export interface InputSystemOptions {
+export interface InputHandlerOptions {
   onCellAdd: (gridX: number, gridY: number) => void;
   onCellRemove: (gridX: number, gridY: number) => void;
   onCellHover?: (gridX: number, gridY: number) => void;
@@ -10,7 +9,7 @@ export interface InputSystemOptions {
   onInsertItem?: (gridX: number, gridY: number) => void;
 }
 
-export class InputSystem implements System {
+export class InputHandler {
   private readonly onPointerDown: (e: PointerEvent) => void;
   private readonly onPointerMove: (e: PointerEvent) => void;
   private readonly onPointerUp: (e: PointerEvent) => void;
@@ -28,7 +27,7 @@ export class InputSystem implements System {
     private canvas: HTMLCanvasElement,
     worldRenderer: WorldRenderer,
     chunkId: string,
-    options: InputSystemOptions,
+    options: InputHandlerOptions,
   ) {
     const { onCellAdd, onCellRemove, onCellHover, onHoverLeave, onRotate, onInsertItem } = options;
 
@@ -104,8 +103,6 @@ export class InputSystem implements System {
     window.addEventListener("pointerup", this.onPointerUp);
     window.addEventListener("keydown", this.onKeyDown);
   }
-
-  public update(_dt: number): void {}
 
   public destroy(): void {
     this.canvas.removeEventListener("pointerdown", this.onPointerDown);

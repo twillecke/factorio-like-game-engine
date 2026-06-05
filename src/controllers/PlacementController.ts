@@ -1,4 +1,3 @@
-import type { System } from "../core/types";
 import type { AssetType } from "../entities/assetTypes";
 import { world } from "../core/World";
 import { ASSET_DEFS } from "../entities/registry";
@@ -6,7 +5,7 @@ import { CHUNK_SIZE } from "../entities/Chunk";
 import { Asset } from "../entities/Asset";
 import type { PreviewRenderer } from "../renderers/PreviewRenderer";
 
-export class PlacementSystem implements System {
+export class PlacementController {
   private tool: AssetType | null = "pipe";
   private rotation: 0 | 90 | 180 | 270 = 0;
   private lastHoverX: number | null = null;
@@ -51,8 +50,6 @@ export class PlacementSystem implements System {
     if (!entity) return;
     world.unregisterSpatial(entity);
   }
-
-  public update(_dt: number): void {}
 
   private canPlace(gridX: number, gridY: number): boolean {
     if (!this.tool) return false;
