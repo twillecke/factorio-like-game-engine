@@ -24,23 +24,24 @@ class Engine {
     return this.app.renderer;
   }
 
-  public async init(canvas: HTMLCanvasElement): Promise<void> {
+  public async init(container: HTMLElement): Promise<void> {
     if (this._app) {
-      this._app.destroy();
+      this._app.destroy(true);
       this._app = null;
     }
     this._app = new Application();
     await this._app.init({
-      canvas,
       background: 0x0d0d1a,
       resizeTo: window,
       antialias: true,
     });
+    container.appendChild(this._app.canvas);
   }
 
   public destroy(): void {
     if (!this._app) return;
-    this._app.destroy();
+    // destroy(true) removes the canvas element from the DOM
+    this._app.destroy(true);
     this._app = null;
   }
 }

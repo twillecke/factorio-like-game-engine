@@ -17,16 +17,20 @@ interface GameCanvasProps {
 }
 
 export function GameCanvas({ tool }: GameCanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const placementRef = useRef<PlacementSystem | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
+    const container = containerRef.current!;
     let cancelled = false;
     let extraCleanup: (() => void) | null = null;
 
-    engine.init(canvas).then(() => {
-      if (cancelled) return;
+    engine.init(container).then(() => {
+      if (cancelled) {
+        engine.destroy();
+        return;
+      }
+      const canvas = engine.app.canvas as HTMLCanvasElement;
       const chunk = new Chunk("chunk-0");
 
       world.register(chunk);
@@ -64,6 +68,8 @@ export function GameCanvas({ tool }: GameCanvasProps) {
         inputSystem.destroy();
         worldRenderer.destroy();
       };
+    }).catch((err) => {
+      console.error("[GameCanvas] engine.init failed:", err);
     });
 
     return () => {
@@ -79,5 +85,5 @@ export function GameCanvas({ tool }: GameCanvasProps) {
     placementRef.current?.setTool(tool);
   }, [tool]);
 
-  return <canvas ref={canvasRef} style={{ display: "block" }} />;
+  return <div ref={containerRef} style={{ display: "block" }} />;
 }
