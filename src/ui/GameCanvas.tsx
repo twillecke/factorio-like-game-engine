@@ -11,6 +11,7 @@ import { ChunkSystem } from "../systems/ChunkSystem";
 import { InputSystem } from "../systems/InputSystem";
 import { PipeSystem } from "../systems/PipeSystem";
 import { PlacementSystem } from "../systems/PlacementSystem";
+import { SteamEngineSystem } from "../systems/SteamEngineSystem";
 
 interface GameCanvasProps {
   tool: AssetType | null;
@@ -55,7 +56,9 @@ export function GameCanvas({ tool }: GameCanvasProps) {
       });
       world.addSystem(new ChunkSystem());
       world.addSystem(placementSystem);
-      world.addSystem(new PipeSystem());
+      const pipeSystem = new PipeSystem();
+      world.addSystem(pipeSystem);
+      world.addSystem(new SteamEngineSystem(pipeSystem));
       world.addSystem(new BeltSystem());
       world.addSystem(inputSystem);
 

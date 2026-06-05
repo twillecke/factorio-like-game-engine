@@ -2,21 +2,20 @@ import type { Entity, System } from "../core/types";
 import { world } from "../core/World";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
-import { SteamEngine } from "../entities/SteamEngine";
 import { Tank } from "../entities/Tank";
 
 function isPipe(e: Entity): e is Pipe { return e instanceof Pipe; }
 function isPump(e: Entity): e is Pump { return e instanceof Pump; }
 function isTank(e: Entity): e is Tank { return e instanceof Tank; }
-function isSteamEngine(e: Entity): e is SteamEngine { return e instanceof SteamEngine; }
 function cellKey(x: number, y: number): string { return `${x},${y}`; }
 
 export class PipeSystem implements System {
-  public update(dt: number): void {
+  private waterCells: Set<string> = new Set();
+
+  public update(_dt: number): void {
     const pipes = world.getAll(isPipe);
     const pumps = world.getAll(isPump);
     const tanks = world.getAll(isTank);
-    const steamEngines = world.getAll(isSteamEngine);
 
     this.resetConnections(pipes);
 
@@ -28,7 +27,20 @@ export class PipeSystem implements System {
 
     const connectedCells = this.buildCellKeySet(connectedPipes);
     this.fillConnectedTanks(tanks, connectedCells);
-    this.updateSteamEngines(steamEngines, tanks, connectedCells, dt);
+    this.buildWaterCells(tanks, connectedCells);
+  }
+
+  public isAdjacentToWater(gridX: number, gridY: number, w: number, h: number): boolean {
+    return this.isAdjacentToSet(gridX, gridY, w, h, this.waterCells);
+  }
+
+  private buildWaterCells(tanks: Tank[], connectedCells: Set<string>): void {
+    this.waterCells = new Set<string>(connectedCells);
+    for (const tank of tanks) {
+      if (!tank.isFilled) continue;
+      for (const cell of this.borderCells(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE))
+        this.waterCells.add(cellKey(cell.x, cell.y));
+    }
   }
 
   private resetConnections(pipes: Pipe[]): void {
@@ -77,25 +89,12 @@ export class PipeSystem implements System {
   private fillConnectedTanks(tanks: Tank[], connectedCells: Set<string>): void {
     for (const tank of tanks) {
       if (tank.isFilled) continue;
-      if (this.isAdjacentToAnyCell(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE, connectedCells))
+      if (this.isAdjacentToSet(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE, connectedCells))
         tank.isFilled = true;
     }
   }
 
-  private updateSteamEngines(engines: SteamEngine[], tanks: Tank[], connectedCells: Set<string>, dt: number): void {
-    const activeCells = new Set<string>(connectedCells);
-    for (const tank of tanks) {
-      if (!tank.isFilled) continue;
-      for (const cell of this.borderCells(tank.gridX, tank.gridY, Tank.CELL_SIZE, Tank.CELL_SIZE))
-        activeCells.add(cellKey(cell.x, cell.y));
-    }
-    for (const engine of engines) {
-      engine.hasWater = this.isAdjacentToAnyCell(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT, activeCells);
-      if (engine.isRunning) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
-    }
-  }
-
-  private isAdjacentToAnyCell(gridX: number, gridY: number, w: number, h: number, cells: Set<string>): boolean {
+  private isAdjacentToSet(gridX: number, gridY: number, w: number, h: number, cells: Set<string>): boolean {
     for (const cell of this.borderCells(gridX, gridY, w, h))
       if (cells.has(cellKey(cell.x, cell.y))) return true;
     return false;
