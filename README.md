@@ -7,7 +7,7 @@ This project's goal is to develop a TypeScript game engine supporting core facto
 - Belt system carrying items
 - Asset placement and removal with ghost preview and rotation
 - Pipe system flooding orthogonally connected pipes, pumps and tanks
-- Asset "feeding" logic. Assets connected to filled pipes or belts properly change their state.
+- Asset "feeding" logic. SteamEngineSystem queries PipeSystem state to switch engine state
 - Toolbar UI for asset selection
 - Camera module handling zoom and pan
 - Debug panel to watch for entity count and types
