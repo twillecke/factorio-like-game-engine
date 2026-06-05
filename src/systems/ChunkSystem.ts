@@ -1,13 +1,14 @@
 import type { System } from "../core/types";
 import { world } from "../core/World";
-import { SteamEngine } from "../entities/SteamEngine";
+import { Chunk } from "../entities/Chunk";
 
-function isSteamEngine(e: object): e is SteamEngine { return e instanceof SteamEngine; }
+function isChunk(e: object): e is Chunk { return e instanceof Chunk; }
 
 export class ChunkSystem implements System {
-  public update(dt: number): void {
-    for (const engine of world.getAll(isSteamEngine)) {
-      if (engine.fuelTime > 0) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
+  public update(_dt: number): void {
+    const chunks = world.getAll(isChunk);
+    for (const chunk of chunks) {
+      void chunk; // placeholder — production logic goes here
     }
   }
 }

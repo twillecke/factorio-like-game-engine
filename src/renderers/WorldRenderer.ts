@@ -4,6 +4,7 @@ import { world } from "../core/World";
 import type { AssetType } from "../entities/assetTypes";
 import { CHUNK_SIZE, type Chunk } from "../entities/Chunk";
 import { Belt } from "../entities/Belt";
+import { BeltItem } from "../entities/BeltItem";
 import { GridEntity } from "../entities/GridEntity";
 import { Pipe } from "../entities/Pipe";
 import { Pump } from "../entities/Pump";
@@ -104,7 +105,7 @@ export class WorldRenderer {
   }
 
   private syncItems(): void {
-    const items = world.getAllItems();
+    const items = world.getAll((e): e is BeltItem => e instanceof BeltItem);
     const ids = new Set(items.map((i) => i.id));
     for (const id of [...this.itemRenderers.keys()])
       if (!ids.has(id)) { this.itemRenderers.get(id)!.destroy(); this.itemRenderers.delete(id); }

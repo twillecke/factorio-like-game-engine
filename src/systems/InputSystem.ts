@@ -1,6 +1,15 @@
 import type { System } from "../core/types";
 import type { WorldRenderer } from "../renderers/WorldRenderer";
 
+export interface InputSystemOptions {
+  onCellAdd: (gridX: number, gridY: number) => void;
+  onCellRemove: (gridX: number, gridY: number) => void;
+  onCellHover?: (gridX: number, gridY: number) => void;
+  onHoverLeave?: () => void;
+  onRotate?: () => void;
+  onInsertItem?: (gridX: number, gridY: number) => void;
+}
+
 export class InputSystem implements System {
   private readonly onPointerDown: (e: PointerEvent) => void;
   private readonly onPointerMove: (e: PointerEvent) => void;
@@ -19,13 +28,10 @@ export class InputSystem implements System {
     private canvas: HTMLCanvasElement,
     worldRenderer: WorldRenderer,
     chunkId: string,
-    onCellAdd: (gridX: number, gridY: number) => void,
-    onCellRemove: (gridX: number, gridY: number) => void,
-    onCellHover?: (gridX: number, gridY: number) => void,
-    onHoverLeave?: () => void,
-    onRotate?: () => void,
-    onInsertItem?: (gridX: number, gridY: number) => void,
+    options: InputSystemOptions,
   ) {
+    const { onCellAdd, onCellRemove, onCellHover, onHoverLeave, onRotate, onInsertItem } = options;
+
     this.onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;

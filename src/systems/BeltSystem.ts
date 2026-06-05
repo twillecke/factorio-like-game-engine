@@ -1,6 +1,7 @@
 import type { System } from "../core/types";
 import { world } from "../core/World";
 import { Belt } from "../entities/Belt";
+import { BeltItem } from "../entities/BeltItem";
 import { isItemReceiver } from "../entities/IItemReceiver";
 
 const BELT_TILES_PER_SEC = 1;
@@ -16,9 +17,9 @@ export class BeltSystem implements System {
   public update(dt: number): void {
     const dProgress = (dt / 60) * BELT_TILES_PER_SEC;
 
-    for (const item of world.getAllItems()) {
+    for (const item of world.getAll((e): e is BeltItem => e instanceof BeltItem)) {
       const belt = world.get<Belt>(item.currentBeltId);
-      if (!belt) { world.unregisterItem(item.id); continue; }
+      if (!belt) { world.unregister(item.id); continue; }
 
       if (item.progress < 1) item.progress = Math.min(1, item.progress + dProgress);
 
@@ -30,11 +31,11 @@ export class BeltSystem implements System {
           item.currentBeltId = next.id;
           item.progress -= 1;
         } else if (isItemReceiver(next)) {
-          if (next.acceptItem(item)) world.unregisterItem(item.id);
+          if (next.acceptItem(item)) world.unregister(item.id);
           // else: receiver blocked, item waits at progress=1
           continue;
         } else {
-          world.unregisterItem(item.id);
+          world.unregister(item.id);
           continue;
         }
       }

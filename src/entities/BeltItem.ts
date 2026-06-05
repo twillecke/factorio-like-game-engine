@@ -1,8 +1,10 @@
+import type { Entity } from "../core/types";
+
 export type ItemType = "coal";
 
 let nextId = 0;
 
-export class BeltItem {
+export class BeltItem implements Entity {
   public x = 0;
   public y = 0;
   public progress = 0;

@@ -38,20 +38,17 @@ export function GameCanvas({ tool }: GameCanvasProps) {
       placementRef.current = placementSystem;
 
       canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-      const inputSystem = new InputSystem(
-        canvas,
-        worldRenderer,
-        chunk.id,
-        (x, y) => placementSystem.placeAt(x, y),
-        (x, y) => placementSystem.removeAt(x, y),
-        (x, y) => placementSystem.hoverAt(x, y),
-        () => placementSystem.clearHover(),
-        () => placementSystem.rotate(),
-        (x, y) => {
+      const inputSystem = new InputSystem(canvas, worldRenderer, chunk.id, {
+        onCellAdd: (x, y) => placementSystem.placeAt(x, y),
+        onCellRemove: (x, y) => placementSystem.removeAt(x, y),
+        onCellHover: (x, y) => placementSystem.hoverAt(x, y),
+        onHoverLeave: () => placementSystem.clearHover(),
+        onRotate: () => placementSystem.rotate(),
+        onInsertItem: (x, y) => {
           const belt = world.getSpatial<Belt>(x, y);
-          if (belt instanceof Belt) world.registerItem(BeltItem.create("coal", belt.id));
+          if (belt instanceof Belt) world.register(BeltItem.create("coal", belt.id));
         },
-      );
+      });
       world.addSystem(new ChunkSystem());
       world.addSystem(placementSystem);
       world.addSystem(new PipeSystem());

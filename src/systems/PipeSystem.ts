@@ -12,7 +12,7 @@ function isSteamEngine(e: Entity): e is SteamEngine { return e instanceof SteamE
 function key(x: number, y: number): string { return `${x},${y}`; }
 
 export class PipeSystem implements System {
-  public update(_dt: number): void {
+  public update(dt: number): void {
     const pipes = world.getAll(isPipe);
     const pumps = world.getAll(isPump);
     const tanks = world.getAll(isTank);
@@ -27,7 +27,7 @@ export class PipeSystem implements System {
     for (const pipe of reachable) pipe.isConnected = true;
 
     this.fillConnectedTanks(tanks, reachable);
-    this.updateSteamEngines(steamEngines, reachable, tanks);
+    this.updateSteamEngines(steamEngines, reachable, tanks, dt);
   }
 
   private resetConnections(pipes: Pipe[]): void {
@@ -87,7 +87,7 @@ export class PipeSystem implements System {
     }
   }
 
-  private updateSteamEngines(engines: SteamEngine[], connectedPipes: Pipe[], tanks: Tank[]): void {
+  private updateSteamEngines(engines: SteamEngine[], connectedPipes: Pipe[], tanks: Tank[], dt: number): void {
     const connectedKeys = new Set(connectedPipes.map(p => key(p.gridX, p.gridY)));
     const filledTankAdjKeys = new Set<string>();
     for (const tank of tanks) {
@@ -96,6 +96,7 @@ export class PipeSystem implements System {
         filledTankAdjKeys.add(key(x, y));
     }
     for (const engine of engines) {
+      if (engine.fuelTime > 0) engine.fuelTime = Math.max(0, engine.fuelTime - dt / 60);
       engine.isRunning = false;
       if (engine.fuelTime <= 0) continue;
       for (const { x, y } of this.cellsAdjacentToObject(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT)) {
