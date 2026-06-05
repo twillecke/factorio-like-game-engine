@@ -48,20 +48,28 @@ export class BeltSystem implements System {
       const [dx, dy] = DIRECTION[belt.rotation];
       const next = world.getSpatial(belt.gridX + dx, belt.gridY + dy);
 
+      // Turning items snap to center of the next tile (progress=0.5) to avoid
+      // visual jumps. This shifts the effective entry point, so MIN_SPACING must be
+      // enforced relative to that entry point across the belt boundary.
+      const isTurn = next instanceof Belt && belt.rotation !== next.rotation;
+      const entryPoint = isTurn ? 0.5 : 0;
+
       const list = beltItems.get(item.currentBeltId)!;
       const idx = list.indexOf(item);
       const leader = idx > 0 ? list[idx - 1] : null;
 
-      // Cap: maintain MIN_SPACING to the leader. For the front item, also enforce
-      // cross-belt spacing: if next belt has a backmost item at progress p, this item
-      // must stop at p + (1 - MIN_SPACING) so the across-boundary gap stays >= MIN_SPACING.
+      // Cap: distance to leader on same belt, or cross-belt spacing for the front item.
+      // Cross-belt formula: backOfNext.progress - entryPoint - MIN_SPACING + 1
+      //   → holds item back until the gap after entry will be >= MIN_SPACING.
       let cap: number;
       if (leader) {
         cap = leader.progress - MIN_SPACING;
       } else if (next instanceof Belt) {
         const nextList = beltItems.get(next.id);
         const backOfNext = nextList ? nextList[nextList.length - 1] : null;
-        cap = backOfNext ? Math.min(1, backOfNext.progress + (1 - MIN_SPACING)) : 1;
+        cap = backOfNext
+          ? Math.min(1, backOfNext.progress - entryPoint - MIN_SPACING + 1)
+          : 1;
       } else {
         cap = 1;
       }
@@ -72,13 +80,16 @@ export class BeltSystem implements System {
 
       if (item.progress >= 1) {
         if (next instanceof Belt) {
-          if (!entryOccupied.has(next.id)) {
+          let nextList = beltItems.get(next.id);
+          if (!nextList) { nextList = []; beltItems.set(next.id, nextList); }
+          const backOfNext = nextList[nextList.length - 1];
+          const canEnter = !entryOccupied.has(next.id) &&
+                           (!backOfNext || backOfNext.progress >= entryPoint + MIN_SPACING);
+          if (canEnter) {
             entryOccupied.add(next.id);
-            let nextList = beltItems.get(next.id);
-            if (!nextList) { nextList = []; beltItems.set(next.id, nextList); }
             list.splice(idx, 1);
             item.currentBeltId = next.id;
-            item.progress -= 1;
+            item.progress = entryPoint;
             nextList.push(item);
           }
           // else: entry occupied — item waits at progress=1
