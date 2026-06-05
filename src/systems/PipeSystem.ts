@@ -97,6 +97,7 @@ export class PipeSystem implements System {
     }
     for (const engine of engines) {
       engine.isRunning = false;
+      if (engine.fuelTime <= 0) continue;
       for (const { x, y } of this.cellsAdjacentToObject(engine.gridX, engine.gridY, SteamEngine.CELL_WIDTH, SteamEngine.CELL_HEIGHT)) {
         const k = key(x, y);
         if (connectedKeys.has(k) || filledTankAdjKeys.has(k)) {
